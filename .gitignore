@@ -1,0 +1,14 @@
+node_modules/
+coverage/
+.DS_Store
+*.log
+
+# Build artifacts
+dist/
+build/
+
+# Environment files
+.env*
+backend/.env*
+!*.env.example
+!backend/.env.example

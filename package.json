@@ -1,0 +1,52 @@
+{
+  "name": "react-example",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "dev": "node server.js",
+    "dev:frontend": "vite --port=3000 --host=0.0.0.0",
+    "dev:backend": "node backend/server.js",
+    "start": "node server.js",
+    "build": "vite build && rm -rf build && cp -r dist build",
+    "clean": "rm -rf dist build",
+    "lint": "node -c server.js backend/server.js",
+    "create-admin": "node backend/scripts/createAdmin.js",
+    "seed:services": "node backend/scripts/seedServices.js",
+    "seed:projects": "node backend/scripts/seedProjects.js",
+    "seed:testimonials": "node backend/scripts/seedTestimonials.js",
+    "seed:team": "node backend/scripts/seedTeam.js",
+    "seed:media": "node backend/scripts/seedInitialMedia.js",
+    "backend": "node backend/server.js"
+  },
+  "dependencies": {
+    "@google/genai": "^2.4.0",
+    "@tailwindcss/postcss": "^4.3.3",
+    "@tailwindcss/vite": "^4.3.3",
+    "@vitejs/plugin-react": "^6.1.1",
+    "bcryptjs": "^3.0.3",
+    "cloudinary": "^2.11.0",
+    "cors": "^2.8.6",
+    "dotenv": "^17.2.3",
+    "express": "^4.21.2",
+    "express-rate-limit": "^8.7.0",
+    "helmet": "^8.3.0",
+    "jsonwebtoken": "^9.0.3",
+    "lucide-react": "^0.546.0",
+    "mongoose": "^9.10.2",
+    "motion": "^12.23.24",
+    "multer": "^2.4.0",
+    "react": "^19.0.1",
+    "react-dom": "^19.0.1",
+    "vite": "^8.3.2",
+    "wouter": "^3.13.0"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.21",
+    "esbuild": "^0.25.0",
+    "tailwindcss": "^4.3.3"
+  }
+}

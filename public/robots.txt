@@ -1,0 +1,7 @@
+# Robots.txt for Haxudio Digital Solutions (https://www.haxudio.com/)
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /api/
+
+Sitemap: https://www.haxudio.com/sitemap.xml
