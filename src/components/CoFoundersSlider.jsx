@@ -123,7 +123,7 @@ export default function CoFoundersSlider() {
   });
 
   const featuredMember = orderedMembers[0];
-  const featuredPhoto = featuredMember.photo || featuredMember.image || '/src/assets/images/cofounder_tech_lead_1790429560393.jpg';
+  const featuredPhoto = featuredMember.photo || featuredMember.image || '/src/assets/images/cofounder_tech_lead_1790429560393.webp';
   const featuredRole = featuredMember.position || featuredMember.role || 'Executive';
   const featuredSocials = featuredMember.socials || {
     linkedin: featuredMember.linkedin,
@@ -238,7 +238,7 @@ export default function CoFoundersSlider() {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {orderedMembers.map((member, positionIdx) => {
           const isLead = positionIdx === 0;
-          const memberPhoto = member.photo || member.image || '/src/assets/images/cofounder_tech_lead_1790429560393.jpg';
+          const memberPhoto = member.photo || member.image || '/src/assets/images/cofounder_tech_lead_1790429560393.webp';
           const memberRole = member.position || member.role || 'Team';
           const memberSocials = member.socials || {
             linkedin: member.linkedin,

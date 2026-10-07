@@ -1,0 +1,37 @@
+# Haxudio Digital Solutions
+
+> Modern digital agency based in Quetta, Balochistan, Pakistan offering web engineering, UI/UX architecture, digital marketing, local SEO, branding, and business automation.
+
+Haxudio Digital Solutions is a premier digital engineering and creative agency headquartered in Quetta, Balochistan, delivering bespoke software systems, corporate identities, and conversion-focused marketing nationwide across Pakistan.
+
+## Company Details
+
+- Organization: Haxudio Digital Solutions
+- Headquarters: A1 City, Hazara Town, Brewery Road, Quetta, Balochistan, Pakistan
+- Official Website: https://www.haxudio.com/
+- Contact Email: hello@haxudio.com
+- Contact Phone: +92 318 3690179
+- Service Regions: Quetta, Balochistan, and Nationwide Pakistan
+
+## Core Services
+
+- [Web Development](https://www.haxudio.com/services/web-development): High-performance web applications built with React, Next.js, and Node.js.
+- [UI/UX Design](https://www.haxudio.com/services/ui-ux-design): User experience research, wireframing, and interactive design systems.
+- [Branding & Identity](https://www.haxudio.com/services/branding): Visual design systems, logo suites, and corporate guidelines.
+- [Digital Marketing](https://www.haxudio.com/services/digital-marketing): Conversion-focused performance marketing and campaign management.
+- [Local & Technical SEO](https://www.haxudio.com/services/seo): Search optimization tailored for businesses in Quetta and Pakistan.
+- [Social Media Management](https://www.haxudio.com/services/social-media): Content creation, community management, and brand engagement.
+- [Commercial Video Editing](https://www.haxudio.com/services/video-editing): Commercial editing, post-production, and motion graphics.
+- [Graphic Design & Prepress](https://www.haxudio.com/services/graphic-design): Brand collateral, print design, and vector assets.
+- [AI & Automation](https://www.haxudio.com/services/ai-automation): Workflow automation and custom software system integrations.
+
+## Primary Pages
+
+- [Homepage](https://www.haxudio.com/): Main agency introduction, verified portfolio, and client inquiries.
+- [About Us](https://www.haxudio.com/about): Agency background, leadership team, and mission.
+- [Services Directory](https://www.haxudio.com/services): Comprehensive catalog of digital services and capabilities.
+- [Portfolio](https://www.haxudio.com/portfolio): Case studies and delivered client solutions.
+- [Quetta Regional Hub](https://www.haxudio.com/locations/quetta): Regional engineering presence and local digital solutions in Quetta.
+- [Agency Process](https://www.haxudio.com/process): Four-phase engineering delivery framework.
+- [Blog](https://www.haxudio.com/blog): Industry insights, technical guides, and digital marketing strategies.
+- [Contact](https://www.haxudio.com/contact): Inquiries, project consultations, and office location.

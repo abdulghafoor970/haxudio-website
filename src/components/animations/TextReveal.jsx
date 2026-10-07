@@ -12,9 +12,11 @@ export default function TextReveal({
   duration = 0.5,
   once = true,
   amount = 0.15,
+  priority = false,
 }) {
   const shouldReduceMotion = useReducedMotion();
   const Tag = tag;
+  const isLcpPriority = priority || tag === 'h1';
 
   if (shouldReduceMotion) {
     return <Tag className={className}>{text}</Tag>;
@@ -23,7 +25,7 @@ export default function TextReveal({
   const words = typeof text === 'string' ? text.split(' ') : [text];
 
   const containerVariants = {
-    hidden: { opacity: 0 },
+    hidden: { opacity: isLcpPriority ? 1 : 0 },
     visible: {
       opacity: 1,
       transition: {
@@ -35,8 +37,8 @@ export default function TextReveal({
 
   const wordVariants = {
     hidden: {
-      y: 16,
-      opacity: 0,
+      y: isLcpPriority ? 0 : 16,
+      opacity: isLcpPriority ? 1 : 0,
     },
     visible: {
       y: 0,
@@ -53,9 +55,10 @@ export default function TextReveal({
       <motion.span
         className="inline-block"
         variants={containerVariants}
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once, amount: typeof amount === 'number' ? amount : 0.15 }}
+        initial={isLcpPriority ? "visible" : "hidden"}
+        animate={isLcpPriority ? "visible" : undefined}
+        whileInView={isLcpPriority ? undefined : "visible"}
+        viewport={isLcpPriority ? undefined : { once, amount: typeof amount === 'number' ? amount : 0.15 }}
       >
         {words.map((word, i) => (
           <span key={i} className="inline-block overflow-hidden mr-[0.25em] align-top">

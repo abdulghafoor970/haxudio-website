@@ -58,8 +58,8 @@ export default function ScrollReveal({
       }}
       viewport={{
         once,
-        amount: typeof amount === 'number' ? amount : 0.15,
-        margin: '0px 0px -40px 0px',
+        amount: 'some',
+        margin: '0px',
       }}
       transition={{
         duration,

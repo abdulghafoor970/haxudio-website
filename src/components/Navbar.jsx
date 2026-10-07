@@ -10,6 +10,7 @@ import MagneticButton from './animations/MagneticButton';
 import { useScrollPosition } from '../hooks/useScrollPosition';
 import { useModal } from '../context/ModalContext';
 import { Menu, X, ArrowUpRight } from 'lucide-react';
+import HaxudioLogo from './HaxudioLogo';
 
 export default function Navbar({ onOpenQuote }) {
   const location = usePathname();
@@ -47,13 +48,16 @@ export default function Navbar({ onOpenQuote }) {
         }`}
       >
         <div className="max-w-7xl mx-auto px-6 md:px-10 flex items-center justify-between">
-          {/* Zone 1: Single text element wordmark */}
+          {/* Zone 1: Brand wordmark with official logo emblem */}
           <Link
             href="/"
-            className="font-display font-bold text-xl md:text-2xl text-[#121316] tracking-tight hover:opacity-85 transition-opacity"
+            className="flex items-center gap-2.5 sm:gap-3 group hover:opacity-90 transition-opacity"
             aria-label="Haxudio Digital Solutions Homepage"
           >
-            Haxudio
+            <HaxudioLogo className="w-8 h-8 sm:w-9 sm:h-9 shrink-0 transition-transform duration-300 group-hover:scale-105" />
+            <span className="font-display font-bold text-xl md:text-2xl text-[#121316] tracking-tight">
+              Haxudio
+            </span>
           </Link>
 
           {/* Zone 2: 4–6 clean text navigation links */}
@@ -126,9 +130,17 @@ export default function Navbar({ onOpenQuote }) {
           >
             <div>
               <div className="flex items-center justify-between pb-6 border-b border-[#121316]/10">
-                <span className="font-display font-bold text-xl text-[#121316]">
-                  Haxudio
-                </span>
+                <Link
+                  href="/"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-2.5 hover:opacity-90 transition-opacity"
+                  aria-label="Haxudio Digital Solutions Homepage"
+                >
+                  <HaxudioLogo className="w-7 h-7 shrink-0" />
+                  <span className="font-display font-bold text-xl text-[#121316]">
+                    Haxudio
+                  </span>
+                </Link>
                 <button
                   type="button"
                   onClick={() => setMobileMenuOpen(false)}

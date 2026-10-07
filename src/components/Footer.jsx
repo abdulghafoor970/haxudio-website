@@ -7,6 +7,7 @@ import { HAXUDIO_SOCIALS, SOCIAL_LINKS } from '../data/socials';
 import { subscribeNewsletter } from '../services/api';
 import { useSettings } from '../context/SettingsContext';
 import { ArrowUpRight, CheckCircle2, MessageCircle } from 'lucide-react';
+import HaxudioLogo from './HaxudioLogo';
 
 export default function Footer() {
   const { settings } = useSettings();
@@ -43,9 +44,16 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-12 pb-16 border-b border-white/10">
           {/* Column 1: Brand & Agency Identity (5 cols) */}
           <div className="lg:col-span-4 space-y-5">
-            <span className="font-display font-bold text-2xl tracking-tight text-[#FAF8F5]">
-              {businessName}
-            </span>
+            <Link
+              href="/"
+              className="inline-flex items-center gap-2.5 sm:gap-3 group hover:opacity-90 transition-opacity"
+              aria-label="Haxudio Digital Solutions Homepage"
+            >
+              <HaxudioLogo className="w-8 h-8 sm:w-9 sm:h-9 shrink-0 transition-transform duration-300 group-hover:scale-105" />
+              <span className="font-display font-bold text-2xl tracking-tight text-[#FAF8F5]">
+                {businessName}
+              </span>
+            </Link>
             <p className="text-sm text-neutral-400 leading-relaxed max-w-sm">
               {businessDescription}
             </p>

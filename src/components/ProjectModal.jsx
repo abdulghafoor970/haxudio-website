@@ -19,7 +19,7 @@ export default function ProjectModal({ project, onClose, onStartSimilarProject }
 
   if (!project) return null;
 
-  const imageUrl = project.coverImage || project.image || '/src/assets/images/hero_agency_studio_1790427835770.jpg';
+  const imageUrl = project.coverImage || project.image || '/src/assets/images/hero_agency_studio_1790427835770.webp';
   const outcomeText = project.results || project.outcome || '';
   const deliverablesList = Array.isArray(project.deliverables) ? project.deliverables : [];
   const technologiesList = Array.isArray(project.technologies) ? project.technologies : [];

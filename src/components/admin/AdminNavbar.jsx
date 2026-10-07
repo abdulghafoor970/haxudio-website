@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ShieldCheck, LogOut, ExternalLink } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import HaxudioLogo from '../HaxudioLogo';
 
 export default function AdminNavbar({ activeTab = 'dashboard' }) {
   const { admin, logout } = useAuth();
@@ -30,7 +31,8 @@ export default function AdminNavbar({ activeTab = 'dashboard' }) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         {/* Brand & Badge */}
         <div className="flex items-center gap-3">
-          <Link href="/" className="flex items-center gap-2 group">
+          <Link href="/" className="flex items-center gap-2 group hover:opacity-90 transition-opacity">
+            <HaxudioLogo className="w-7 h-7 shrink-0 transition-transform duration-300 group-hover:scale-105" />
             <span className="font-display font-extrabold tracking-tight text-lg text-[#FAF8F5]">
               HAX<span className="text-[#C25E34]">UDIO</span>
             </span>

@@ -30,7 +30,10 @@ export function getOptimizedImageUrl(url, options = {}) {
 
   const match = url.match(CLOUDINARY_REGEX);
   if (!match) {
-    // Local assets, relative paths, or non-Cloudinary images returned unchanged
+    // Transparently resolve bundled local JPG assets to their high-performance WebP counterparts
+    if (url.startsWith('/src/assets/images/') && /\.(jpe?g)$/i.test(url)) {
+      return url.replace(/\.(jpe?g)$/i, '.webp');
+    }
     return url;
   }
 

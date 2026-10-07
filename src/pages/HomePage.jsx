@@ -24,6 +24,7 @@ import { useModal } from '../context/ModalContext';
 import { useSettings } from '../context/SettingsContext';
 import { BRAND } from '../data/navigation';
 import { ArrowUpRight, ArrowRight, Shield, Sparkles, CheckCircle2, MapPin } from 'lucide-react';
+import { getOptimizedImageUrl } from '../utils/cloudinary';
 
 // Animation primitives
 import ScrollReveal from '../components/animations/ScrollReveal';
@@ -153,10 +154,7 @@ export default function HomePage({ onOpenQuote, onSelectProject }) {
       {/* 1. Hero Section with Cinematic Reveals */}
       <Hero content={homeContent.hero} onOpenQuote={handleOpenQuote} />
 
-      {/* 2. Premium Moving Services Strip (Dual Direction Infinite Loop) */}
-      <PremiumMarquee showDualStrip={true} variant="light" className="my-2" />
-
-      {/* 3. Positioning / Agency Guarantee */}
+      {/* 2. Positioning / Agency Guarantee */}
       <section className="border-y border-[#121316]/10 bg-white py-8">
         <div className="max-w-7xl mx-auto px-6 md:px-10">
           <ScrollReveal direction="up" distance={16} delay={0.1}>
@@ -185,7 +183,7 @@ export default function HomePage({ onOpenQuote, onSelectProject }) {
         </div>
       </section>
 
-      {/* 4. Core Capabilities / Services (Staggered Grid) */}
+      {/* 3. Core Capabilities / Services (Staggered Grid) */}
       <section className="py-24 max-w-7xl mx-auto px-6 md:px-10">
         <ScrollReveal direction="up" distance={24} className="mb-12">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
@@ -223,6 +221,9 @@ export default function HomePage({ onOpenQuote, onSelectProject }) {
           ))}
         </StaggerContainer>
       </section>
+
+      {/* Services Marquee: Moving strip under Service cards (Desktop only >=768px, unmounted on mobile <768px) */}
+      <PremiumMarquee showDualStrip={true} variant="light" className="my-2" />
 
       {/* 5. Selected Work / Case Studies */}
       <section className="py-24 bg-[#F4F1EA] border-y border-[#121316]/10">
@@ -396,10 +397,13 @@ export default function HomePage({ onOpenQuote, onSelectProject }) {
               <Parallax offset={16}>
                 <div className="relative aspect-[4/3] rounded-xl overflow-hidden border border-[#121316]/10 shadow-lg bg-neutral-100 group">
                   <img
-                    src={homeContent.agencyintro?.hubImageUrl || '/src/assets/images/haxudio_quetta_hub_1790427878986.jpg'}
+                    src={getOptimizedImageUrl(homeContent.agencyintro?.hubImageUrl || '/src/assets/images/haxudio_quetta_hub_1790427878986.webp', { width: 768 })}
                     alt="Haxudio Digital Solutions digital agency headquarters in Quetta Balochistan"
+                    width="1376"
+                    height="768"
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                     loading="lazy"
+                    decoding="async"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex items-end p-5">
                     <div className="text-white">

@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { usePathname } from 'next/navigation';
 import { AuthProvider } from '../context/AuthContext';
 import { ModalProvider, useModal } from '../context/ModalContext';
@@ -8,11 +8,13 @@ import { SettingsProvider } from '../context/SettingsContext';
 import Navbar from './Navbar';
 import Footer from './Footer';
 import ScrollToTop from './ScrollToTop';
-import QuoteBuilderModal from './QuoteBuilderModal';
-import ProjectModal from './ProjectModal';
 import WhatsAppWidget from './WhatsAppWidget';
 import ScrollProgress from './animations/ScrollProgress';
 import { motion } from 'motion/react';
+
+// Lazy-load interactive modals so they are not part of initial mobile paint
+const QuoteBuilderModal = lazy(() => import('./QuoteBuilderModal'));
+const ProjectModal = lazy(() => import('./ProjectModal'));
 
 function AppShellContent({ children }) {
   const pathname = usePathname();
@@ -57,19 +59,27 @@ function AppShellContent({ children }) {
       {!isAdminRoute && <Footer />}
       {!isAdminRoute && <WhatsAppWidget />}
 
-      {/* Global Interactive Modals */}
-      <QuoteBuilderModal
-        isOpen={isQuoteModalOpen}
-        onClose={closeQuoteModal}
-        preselectedService={quotePreselectedService}
-      />
+      {/* Global Interactive Modals - Loaded on demand */}
+      {isQuoteModalOpen && (
+        <Suspense fallback={null}>
+          <QuoteBuilderModal
+            isOpen={isQuoteModalOpen}
+            onClose={closeQuoteModal}
+            preselectedService={quotePreselectedService}
+          />
+        </Suspense>
+      )}
 
-      <ProjectModal
-        project={selectedProjectForModal}
-        isOpen={!!selectedProjectForModal}
-        onClose={closeProjectModal}
-        onStartSimilar={startSimilarProject}
-      />
+      {selectedProjectForModal && (
+        <Suspense fallback={null}>
+          <ProjectModal
+            project={selectedProjectForModal}
+            isOpen={!!selectedProjectForModal}
+            onClose={closeProjectModal}
+            onStartSimilar={startSimilarProject}
+          />
+        </Suspense>
+      )}
     </div>
   );
 }

@@ -115,7 +115,7 @@ export default function AdminTestimonialsPage() {
       position: 'Managing Partner',
       company: 'Client Organization, Quetta',
       testimonial: '',
-      photo: '/src/assets/images/project_hospital_portal_1790431541258.jpg',
+      photo: '/src/assets/images/project_hospital_portal_1790431541258.webp',
       photoAlt: '',
       rating: 5,
       project: 'Web Platform & SEO',

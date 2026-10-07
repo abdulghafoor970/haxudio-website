@@ -5,9 +5,9 @@ const dotenv = require('dotenv');
 
 const path = require('path');
 
-// Load environment variables reliably from backend/.env or root
-dotenv.config({ path: path.resolve(__dirname, '.env'), override: true });
-dotenv.config({ path: path.resolve(process.cwd(), 'backend/.env'), override: true });
+// Load environment variables reliably from backend/.env or root (without overwriting existing runtime env)
+dotenv.config({ path: path.resolve(__dirname, '.env') });
+dotenv.config({ path: path.resolve(process.cwd(), 'backend/.env') });
 dotenv.config();
 
 // Normalize MONGODB_URI if passed with variable name prefix or surrounding quotes

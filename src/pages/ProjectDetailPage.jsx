@@ -7,6 +7,7 @@ import SEOHead from '../components/SEOHead';
 import { fetchPublicProjectBySlug } from '../services/projectApi';
 import { useModal } from '../context/ModalContext';
 import { ArrowLeft, ArrowUpRight, CheckCircle2, ChevronRight, Globe, Layers, Sparkles } from 'lucide-react';
+import { getOptimizedImageUrl } from '../utils/cloudinary';
 
 export default function ProjectDetailPage({ slug: propSlug, onOpenQuote }) {
   const urlParams = useParams();
@@ -89,7 +90,7 @@ export default function ProjectDetailPage({ slug: propSlug, onOpenQuote }) {
     );
   }
 
-  const imageUrl = project.coverImage || project.image || '/src/assets/images/hero_agency_studio_1790427835770.jpg';
+  const imageUrl = project.coverImage || project.image || '/src/assets/images/hero_agency_studio_1790427835770.webp';
   const summaryText = project.shortDescription || project.summary || project.description || '';
   const outcomeText = project.results || project.outcome || '';
   const deliverablesList = Array.isArray(project.deliverables) ? project.deliverables : [];
@@ -188,9 +189,11 @@ export default function ProjectDetailPage({ slug: propSlug, onOpenQuote }) {
         {/* Hero Cover Image Banner */}
         <div className="relative aspect-[16/9] w-full rounded-2xl overflow-hidden mb-16 border border-[#121316]/10 shadow-lg bg-neutral-900">
           <img
-            src={imageUrl}
+            src={getOptimizedImageUrl(imageUrl, { width: 1200 })}
             alt={project.coverImageAlt || `${project.title} Case Study Preview`}
             className="w-full h-full object-cover"
+            loading="lazy"
+            decoding="async"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-[#121316]/80 via-transparent to-transparent flex items-end p-6 sm:p-10">
             <div className="text-white space-y-1">

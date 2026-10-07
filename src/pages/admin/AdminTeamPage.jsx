@@ -123,7 +123,7 @@ export default function AdminTeamPage() {
       position: 'Associate Technical Lead',
       discipline: 'Frontend Engineering & Systems',
       bio: 'Engineers responsive interfaces, accessibility compliance, and fast web experiences for commercial enterprises.',
-      photo: '/src/assets/images/cofounder_tech_lead_1790429560393.jpg',
+      photo: '/src/assets/images/cofounder_tech_lead_1790429560393.webp',
       photoAlt: '',
       badge: 'Core Leadership',
       highlight: 'React · Tailwind CSS · Systems',
@@ -485,7 +485,7 @@ export default function AdminTeamPage() {
                         <div className="flex items-center gap-3">
                           <div className="w-9 h-9 rounded-full overflow-hidden bg-neutral-900 border border-[#2D313D] shrink-0">
                             <img
-                              src={member.photo || member.image || '/src/assets/images/cofounder_tech_lead_1790429560393.jpg'}
+                              src={member.photo || member.image || '/src/assets/images/cofounder_tech_lead_1790429560393.webp'}
                               alt={member.name}
                               className="w-full h-full object-cover"
                             />

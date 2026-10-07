@@ -4,7 +4,7 @@ import ImageReveal from './animations/ImageReveal';
 import { getOptimizedImageUrl } from '../utils/cloudinary';
 
 export default function ProjectCard({ project, onSelect }) {
-  const rawImageUrl = project.coverImage || project.image || '/src/assets/images/hero_agency_studio_1790427835770.jpg';
+  const rawImageUrl = project.coverImage || project.image || '/src/assets/images/hero_agency_studio_1790427835770.webp';
   const imageUrl = getOptimizedImageUrl(rawImageUrl, { width: 768 });
   const summaryText = project.shortDescription || project.summary || project.description || '';
   const servicesList = Array.isArray(project.services) ? project.services : [];

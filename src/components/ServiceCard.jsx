@@ -2,8 +2,11 @@ import React from 'react';
 import Link from 'next/link';
 import { ArrowUpRight } from 'lucide-react';
 import ImageReveal from './animations/ImageReveal';
+import { getOptimizedImageUrl } from '../utils/cloudinary';
 
 export default function ServiceCard({ service, featured = false }) {
+  const serviceImageUrl = service.image ? getOptimizedImageUrl(service.image, { width: 768 }) : '';
+
   return (
     <article
       className={`group relative bg-white border border-[#121316]/10 rounded-xl overflow-hidden flex flex-col justify-between card-hover-fx h-full ${
@@ -12,9 +15,9 @@ export default function ServiceCard({ service, featured = false }) {
     >
       <div>
         {/* Service Visual Preview Image Carrier with ImageReveal */}
-        {service.image && (
+        {serviceImageUrl && (
           <ImageReveal
-            src={service.image}
+            src={serviceImageUrl}
             alt={service.imageAlt || service.title}
             containerClassName="aspect-[16/10] bg-neutral-100 border-b border-[#121316]/8"
             className="transition-transform duration-700 ease-out group-hover:scale-108"

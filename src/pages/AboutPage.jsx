@@ -9,6 +9,7 @@ import { BRAND } from '../data/navigation';
 import { PAGE_SEO } from '../data/seo';
 import { useModal } from '../context/ModalContext';
 import { fetchPublicContent } from '../services/contentApi';
+import { getOptimizedImageUrl } from '../utils/cloudinary';
 import { MapPin, ArrowUpRight, CheckCircle2 } from 'lucide-react';
 
 export default function AboutPage({ onOpenQuote }) {
@@ -95,10 +96,11 @@ export default function AboutPage({ onOpenQuote }) {
           <div className="lg:col-span-6">
             <div className="aspect-[4/3] rounded-lg overflow-hidden border border-[#121316]/10 shadow-md bg-neutral-100">
               <img
-                src={hero.heroImageUrl || '/src/assets/images/haxudio_quetta_hub_1790427878986.jpg'}
+                src={getOptimizedImageUrl(hero.heroImageUrl || '/src/assets/images/haxudio_quetta_hub_1790427878986.webp', { width: 768 })}
                 alt={hero.heroImageAlt || 'Haxudio Digital Solutions Quetta workspace'}
                 className="w-full h-full object-cover"
                 loading="lazy"
+                decoding="async"
                 referrerPolicy="no-referrer"
               />
             </div>

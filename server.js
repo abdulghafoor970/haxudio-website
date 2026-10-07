@@ -3,10 +3,17 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
 import fs from 'fs';
+import compression from 'compression';
+
+const runtimePort = process.env.PORT;
+const runtimeNodeEnv = process.env.NODE_ENV;
 
 // Load backend environment variables reliably
-dotenv.config({ path: path.resolve(process.cwd(), 'backend/.env'), override: true });
+dotenv.config({ path: path.resolve(process.cwd(), 'backend/.env') });
 dotenv.config();
+
+if (runtimePort) process.env.PORT = runtimePort;
+if (runtimeNodeEnv) process.env.NODE_ENV = runtimeNodeEnv;
 
 // Normalize MONGODB_URI if passed with variable name prefix or surrounding quotes
 if (process.env.MONGODB_URI && typeof process.env.MONGODB_URI === 'string') {
@@ -38,6 +45,11 @@ async function startServer() {
   // Trust reverse proxy (Google Cloud Run / AI Studio environment)
   app.set('trust proxy', 1);
 
+  // Compress all responses (Gzip/Deflate) to minimize mobile payload sizes
+  app.use(compression({
+    threshold: 1024,
+  }));
+
   // Security Headers: In production, enforce strict CSP, HSTS, and frame protection.
   // In development / preview, permit iframe preview for AI Studio.
   if (isProduction) {
@@ -52,6 +64,7 @@ async function startServer() {
       "font-src 'self' https://fonts.gstatic.com data:",
       "img-src 'self' data: blob: https://res.cloudinary.com https://*.cloudinary.com",
       "connect-src 'self' https://res.cloudinary.com https://*.cloudinary.com",
+      "frame-src 'self' https://www.google.com https://maps.google.com",
       "frame-ancestors 'self'",
       "base-uri 'self'",
       "form-action 'self'",
@@ -75,7 +88,34 @@ async function startServer() {
   }
 
   // Serve static raw assets directly from src/assets with moderate caching
-  app.use('/src/assets', express.static(path.resolve(process.cwd(), 'src/assets'), { maxAge: '7d' }));
+  app.use('/src/assets', express.static(path.resolve(process.cwd(), 'src/assets'), {
+    maxAge: '30d',
+    setHeaders: (res, filePath) => {
+      if (/\.(webp|jpg|jpeg|png|svg|ico)$/i.test(filePath)) {
+        res.setHeader('Cache-Control', 'public, max-age=2592000, immutable');
+      }
+    },
+  }));
+
+  // Handle machine-readable AI catalog requests cleanly (prevents returning index.html as JSON)
+  app.get('/ai-catalog.json', (req, res) => {
+    res.status(404).type('application/json').json({
+      error: 'Not Found',
+      message: 'No AI catalog manifest is published for this application',
+      status: 404,
+    });
+  });
+
+  // Explicitly serve llms.txt with correct content-type and caching
+  app.get('/llms.txt', (req, res, next) => {
+    const llmsPath = path.resolve(process.cwd(), 'public/llms.txt');
+    if (fs.existsSync(llmsPath)) {
+      res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+      res.setHeader('Cache-Control', 'public, max-age=86400');
+      return res.sendFile(llmsPath);
+    }
+    next();
+  });
 
   // Mount backend Express application containing /api/* routes
   app.use(backendApp);
@@ -103,18 +143,23 @@ async function startServer() {
       fallthrough: false,
     }));
 
-    // 2. Static root assets (favicon, etc.) in dist
+    // 2. Static root assets (favicon, images, etc.) in dist
     app.use(express.static(distPath, {
-      maxAge: '1h',
+      maxAge: '7d',
       setHeaders: (res, filePath) => {
         if (filePath.endsWith('index.html')) {
           res.setHeader('Cache-Control', 'no-cache, must-revalidate');
+        } else if (/\.(webp|jpg|jpeg|png|svg|ico)$/i.test(filePath)) {
+          res.setHeader('Cache-Control', 'public, max-age=2592000, immutable');
         }
       },
     }));
 
-    // 3. SPA fallback: always serve index.html with revalidation headers
+    // 3. SPA fallback: serve index.html for application routes, return 404 for missing static files
     app.get('*', (req, res) => {
+      if (/\.[a-zA-Z0-9]+$/.test(req.path)) {
+        return res.status(404).type('text/plain').send('File not found');
+      }
       res.setHeader('Cache-Control', 'no-cache, must-revalidate');
       res.sendFile(path.join(distPath, 'index.html'));
     });

@@ -23,7 +23,7 @@ export function StaggerContainer({
   }
 
   const containerVariants = {
-    hidden: { opacity: 0 },
+    hidden: { opacity: 1 },
     visible: {
       opacity: 1,
       transition: {
@@ -38,7 +38,7 @@ export function StaggerContainer({
       variants={containerVariants}
       initial="hidden"
       whileInView="visible"
-      viewport={{ once, amount: typeof amount === 'number' ? amount : 0.15 }}
+      viewport={{ once, amount: 'some' }}
       className={className}
       {...props}
     >

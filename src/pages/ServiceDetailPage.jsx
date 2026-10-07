@@ -9,6 +9,7 @@ import { SERVICES } from '../data/services';
 import { fetchPublicServiceBySlug } from '../services/serviceApi';
 import { useModal } from '../context/ModalContext';
 import { ArrowLeft, ArrowUpRight, CheckCircle2, ChevronRight, HelpCircle } from 'lucide-react';
+import { getOptimizedImageUrl } from '../utils/cloudinary';
 
 export default function ServiceDetailPage({ slug: propSlug, onOpenQuote }) {
   const urlParams = useParams();
@@ -232,9 +233,11 @@ export default function ServiceDetailPage({ slug: propSlug, onOpenQuote }) {
         {service.image && (
           <div className="mb-20 rounded-2xl overflow-hidden border border-[#121316]/10 shadow-lg bg-neutral-100 aspect-[21/9] sm:aspect-[24/9] relative group">
             <img
-              src={service.image}
+              src={getOptimizedImageUrl(service.image, { width: 1200 })}
               alt={service.imageAlt || `${service.title} in Quetta Pakistan`}
               className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-103"
+              loading="lazy"
+              decoding="async"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex items-end p-6 sm:p-8">
               <div className="text-white">

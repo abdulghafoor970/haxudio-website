@@ -11,8 +11,8 @@ export default function LocationMapCard({ className = '' }) {
   const googleProfileUrl = HAXUDIO_SOCIALS.googleBusinessProfile || 'https://share.google/zFaaZlrDoY9v7zIEZ';
   const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=A1+City+Hazara+Town+Brewery+Road+Quetta`;
 
-  // OpenStreetMap centered on Brewery Road, Hazara Town, Quetta
-  const mapEmbedUrl = `https://www.openstreetmap.org/export/embed.html?bbox=66.9520%2C30.1550%2C66.9920%2C30.1850&layer=mapnik&marker=30.1710%2C66.9715`;
+  // Google Maps Embed for A1 City, Hazara Town, Brewery Road, Quetta, Pakistan
+  const mapEmbedUrl = 'https://www.google.com/maps/embed?origin=mfe&pb=!1m3!2m1!1sA1+City,+Hazara+Town,+Brewery+Road,+Quetta,+Pakistan!6i15';
 
   return (
     <div className={`bg-white border border-[#121316]/10 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow ${className}`}>
@@ -67,13 +67,16 @@ export default function LocationMapCard({ className = '' }) {
 
       {/* Map Interactive Canvas / Visual Frame */}
       <div className="relative aspect-[16/9] sm:aspect-[21/9] bg-neutral-200 overflow-hidden">
-        {/* Interactive OpenStreetMap Embed centered on Brewery Road, Hazara Town */}
+        {/* Interactive Google Maps Embed centered on Brewery Road, Hazara Town */}
         <iframe
           title="Haxudio Digital Solutions Quetta Location Map"
           src={mapEmbedUrl}
           className="w-full h-full border-0 filter saturate-[1.1] contrast-[1.05]"
           loading="lazy"
           tabIndex="-1"
+          referrerPolicy="no-referrer-when-downgrade"
+          allowFullScreen
+          aria-label="Google Maps Location for Haxudio Digital Solutions in Quetta"
         />
 
         {/* Floating Location Overlay Badge */}

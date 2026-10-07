@@ -146,7 +146,7 @@ function MarqueeTrack({
   );
 }
 
-export default function PremiumMarquee({
+function DesktopMarquee({
   showDualStrip = true,
   variant = 'light',
   className = '',
@@ -183,5 +183,37 @@ export default function PremiumMarquee({
         />
       )}
     </section>
+  );
+}
+
+export default function PremiumMarquee(props) {
+  const [isDesktop, setIsDesktop] = useState(false);
+
+  useEffect(() => {
+    // Only run marquee engine on desktop viewports (>= 768px)
+    const mediaQuery = window.matchMedia('(min-width: 768px)');
+    setIsDesktop(mediaQuery.matches);
+
+    const handleMediaChange = (e) => {
+      setIsDesktop(e.matches);
+    };
+
+    mediaQuery.addEventListener('change', handleMediaChange);
+    return () => {
+      mediaQuery.removeEventListener('change', handleMediaChange);
+    };
+  }, []);
+
+  // On mobile (< 768px): Return null immediately.
+  // This completely eliminates motion observers, velocity calculations, duplicated DOM,
+  // and rAF animation cycles on mobile devices with zero layout residue or blank space.
+  if (!isDesktop) {
+    return null;
+  }
+
+  return (
+    <div className="hidden md:block">
+      <DesktopMarquee {...props} />
+    </div>
   );
 }

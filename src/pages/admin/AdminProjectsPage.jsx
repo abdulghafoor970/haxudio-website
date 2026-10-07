@@ -163,7 +163,7 @@ export default function AdminProjectsPage() {
       clientType: 'Commercial Client',
       industry: 'Enterprise Technology',
       location: 'Quetta, Balochistan',
-      coverImage: '/src/assets/images/hero_agency_studio_1790427835770.jpg',
+      coverImage: '/src/assets/images/hero_agency_studio_1790427835770.webp',
       coverImageAlt: '',
       images: [],
       technologies: ['React', 'Tailwind CSS', 'Next.js'],

@@ -21,8 +21,9 @@ export default function Hero({ onOpenQuote, content = {} }) {
   const primaryCtaUrl = content?.primaryCtaUrl || '';
   const secondaryCtaLabel = content?.secondaryCtaLabel || 'Explore Our Services';
   const secondaryCtaUrl = content?.secondaryCtaUrl || '/services';
-  const heroImageUrl = content?.heroImageUrl || '/src/assets/images/hero_agency_studio_1790427835770.jpg';
+  const heroImageUrl = content?.heroImageUrl || '/src/assets/images/hero_agency_studio_1790427835770.webp';
   const heroImageAlt = content?.heroImageAlt || 'Haxudio Digital Solutions digital agency studio in Quetta';
+  const isCloudinaryHero = heroImageUrl.includes('res.cloudinary.com');
 
   return (
     <section className="relative pt-32 pb-16 md:pt-40 md:pb-24 overflow-hidden">
@@ -34,7 +35,7 @@ export default function Hero({ onOpenQuote, content = {} }) {
           {/* Left Column: Editorial Headline & Messaging (7 cols) */}
           <div className="lg:col-span-7 space-y-6">
             {/* Eyebrow / Region Indicator with animated pulse beacon */}
-            <ScrollReveal direction="down" distance={16} delay={0.1}>
+            <ScrollReveal direction="down" distance={12} delay={0}>
               <div className="inline-flex items-center gap-2 text-xs font-semibold text-[#666461] tracking-wider uppercase">
                 <span className="w-2.5 h-2.5 rounded-full bg-[#C25E34] animate-ping opacity-75 inline-block" />
                 <span className="-ml-3.5 w-2.5 h-2.5 rounded-full bg-[#C25E34] inline-block" />
@@ -42,24 +43,25 @@ export default function Hero({ onOpenQuote, content = {} }) {
               </div>
             </ScrollReveal>
 
-            {/* Main Headline with Editorial Line-by-Line TextReveal */}
+            {/* Main Headline with Editorial Line-by-Line TextReveal (LCP Priority) */}
             <TextReveal
               tag="h1"
               text={heading}
+              priority={true}
               className="font-display text-4xl sm:text-5xl md:text-6xl lg:text-[4.2rem] font-bold text-[#121316] tracking-tight leading-[1.08] text-balance"
-              delay={0.18}
-              stagger={0.04}
+              delay={0}
+              stagger={0.025}
             />
 
             {/* Supporting Copy (Natural Human Phrasing) with ScrollReveal */}
-            <ScrollReveal direction="up" distance={20} delay={0.35}>
+            <ScrollReveal direction="up" distance={16} delay={0.05}>
               <p className="text-base sm:text-lg md:text-xl text-[#666461] leading-relaxed max-w-2xl font-normal">
                 {description}
               </p>
             </ScrollReveal>
 
             {/* CTA Buttons with Magnetic Pull + Stagger */}
-            <ScrollReveal direction="up" distance={24} delay={0.45}>
+            <ScrollReveal direction="up" distance={16} delay={0.1}>
               <div className="pt-2 flex flex-wrap items-center gap-4">
                 <MagneticButton strength={0.2} maxOffset={6}>
                   {primaryCtaUrl && primaryCtaUrl !== '/contact' ? (
@@ -95,7 +97,7 @@ export default function Hero({ onOpenQuote, content = {} }) {
             </ScrollReveal>
 
             {/* Social Media Channels with Official Haxudio Links */}
-            <ScrollReveal direction="up" distance={16} delay={0.55}>
+            <ScrollReveal direction="up" distance={12} delay={0.15}>
               <div className="pt-2 flex items-center gap-3 text-xs text-[#666461]">
                 <span className="font-semibold text-[#121316]">Follow Haxudio:</span>
                 <SocialIcons
@@ -112,8 +114,8 @@ export default function Hero({ onOpenQuote, content = {} }) {
 
             {/* Grounded Agency Attributes: Staggered Micro-Cards */}
             <StaggerContainer
-              stagger={0.08}
-              delay={0.6}
+              stagger={0.06}
+              delay={0.2}
               className="pt-6 border-t border-[#121316]/10 grid grid-cols-1 sm:grid-cols-3 gap-4 text-left"
             >
               {/* Card 1 */}
@@ -194,18 +196,45 @@ export default function Hero({ onOpenQuote, content = {} }) {
                 {/* Outer decorative halo ring */}
                 <div className="absolute -inset-1.5 bg-gradient-to-tr from-[#C25E34]/20 via-transparent to-[#121316]/10 rounded-xl blur-sm -z-10" />
 
-                {/* Main LCP Hero Image Carrier - Rendered immediately for optimal LCP paint */}
+                {/* Main LCP Hero Image Carrier - Rendered immediately for optimal LCP paint with explicit aspect ratio */}
                 <div className="rounded-xl border border-[#121316]/10 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.15)] bg-neutral-100 overflow-hidden relative group aspect-[4/3]">
-                  <img
-                    src={getOptimizedImageUrl(heroImageUrl, { width: 960 })}
-                    srcSet={getCloudinarySrcSet(heroImageUrl, [480, 768, 960, 1200]) || undefined}
-                    sizes={RESPONSIVE_SIZES.hero}
-                    alt={heroImageAlt}
-                    loading="eager"
-                    fetchPriority="high"
-                    decoding="async"
-                    className="w-full h-full object-cover transform-gpu transition-transform duration-700 ease-out group-hover:scale-[1.03]"
-                  />
+                  {isCloudinaryHero ? (
+                    <img
+                      src={getOptimizedImageUrl(heroImageUrl, { width: 960 })}
+                      srcSet={getCloudinarySrcSet(heroImageUrl, [480, 768, 960, 1200]) || undefined}
+                      sizes={RESPONSIVE_SIZES.hero}
+                      alt={heroImageAlt}
+                      width="1376"
+                      height="768"
+                      loading="eager"
+                      fetchPriority="high"
+                      decoding="async"
+                      className="w-full h-full object-cover transform-gpu transition-transform duration-700 ease-out group-hover:scale-[1.03]"
+                    />
+                  ) : (
+                    <picture>
+                      <source
+                        type="image/webp"
+                        media="(max-width: 767px)"
+                        srcSet="/src/assets/images/hero_agency_studio_mobile.webp"
+                      />
+                      <source
+                        type="image/webp"
+                        media="(min-width: 768px)"
+                        srcSet="/src/assets/images/hero_agency_studio_1790427835770.webp"
+                      />
+                      <img
+                        src="/src/assets/images/hero_agency_studio_1790427835770.webp"
+                        alt={heroImageAlt}
+                        width="1376"
+                        height="768"
+                        loading="eager"
+                        fetchPriority="high"
+                        decoding="async"
+                        className="w-full h-full object-cover transform-gpu transition-transform duration-700 ease-out group-hover:scale-[1.03]"
+                      />
+                    </picture>
+                  )}
                   {/* Subtle sheen gradient overlay */}
                   <div className="absolute inset-0 bg-gradient-to-t from-[#121316]/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
                 </div>
