@@ -51,11 +51,11 @@ export default function Navbar({ onOpenQuote }) {
           {/* Zone 1: Brand wordmark with official logo emblem */}
           <Link
             href="/"
-            className="flex items-center gap-2.5 sm:gap-3 group hover:opacity-90 transition-opacity"
+            className="flex items-center gap-1 sm:gap-1.5 group hover:opacity-90 transition-opacity"
             aria-label="Haxudio Digital Solutions Homepage"
           >
-            <HaxudioLogo className="w-8 h-8 sm:w-9 sm:h-9 shrink-0 transition-transform duration-300 group-hover:scale-105" />
-            <span className="font-display font-bold text-xl md:text-2xl text-[#121316] tracking-tight">
+            <HaxudioLogo className="w-14 h-14 shrink-0 transition-transform duration-300 group-hover:scale-105" />
+            <span className="font-display font-bold text-xl md:text-2xl text-[#121316] tracking-tight mr-3 sm:mr-5">
               Haxudio
             </span>
           </Link>
@@ -133,11 +133,11 @@ export default function Navbar({ onOpenQuote }) {
                 <Link
                   href="/"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center gap-2.5 hover:opacity-90 transition-opacity"
+                  className="flex items-center gap-1 sm:gap-1.5 hover:opacity-90 transition-opacity"
                   aria-label="Haxudio Digital Solutions Homepage"
                 >
-                  <HaxudioLogo className="w-7 h-7 shrink-0" />
-                  <span className="font-display font-bold text-xl text-[#121316]">
+                  <HaxudioLogo className="w-14 h-14 shrink-0" />
+                  <span className="font-display font-bold text-xl text-[#121316] tracking-tight mr-3">
                     Haxudio
                   </span>
                 </Link>

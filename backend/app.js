@@ -63,7 +63,8 @@ const corsOptions = {
 
     // In production mode: strictly validate origin against configured allowed origins
     if (isProduction) {
-      if (allowedOrigins.indexOf(origin) !== -1) {
+      const isVercelDomain = /^https:\/\/[a-zA-Z0-9_.-]+\.vercel\.app$/.test(origin);
+      if (allowedOrigins.indexOf(origin) !== -1 || isVercelDomain) {
         return callback(null, true);
       }
       return callback(new Error('Blocked by CORS policy: Origin not allowed in production.'));

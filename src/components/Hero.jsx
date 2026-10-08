@@ -34,12 +34,10 @@ export default function Hero({ onOpenQuote, content = {} }) {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
           {/* Left Column: Editorial Headline & Messaging (7 cols) */}
           <div className="lg:col-span-7 space-y-6">
-            {/* Eyebrow / Region Indicator with animated pulse beacon */}
+            {/* Eyebrow / Region Indicator */}
             <ScrollReveal direction="down" distance={12} delay={0}>
-              <div className="inline-flex items-center gap-2 text-xs font-semibold text-[#666461] tracking-wider uppercase">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#C25E34] animate-ping opacity-75 inline-block" />
-                <span className="-ml-3.5 w-2.5 h-2.5 rounded-full bg-[#C25E34] inline-block" />
-                <span className="hover:text-[#121316] transition-colors">{eyebrow}</span>
+              <div className="inline-flex items-center px-4 py-2 sm:px-5 sm:py-2 md:px-6 md:py-2.5 rounded-full bg-[#D5FF8A] text-[#111111] font-bold text-[11px] sm:text-xs md:text-[13px] tracking-[0.10em] sm:tracking-[0.15em] md:tracking-[0.18em] uppercase max-w-full text-balance leading-normal">
+                <span>{eyebrow}</span>
               </div>
             </ScrollReveal>
 
