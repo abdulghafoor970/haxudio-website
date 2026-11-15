@@ -4,16 +4,16 @@ import React from 'react';
 import Link from 'next/link';
 import SEOHead from '../components/SEOHead';
 import SectionHeading from '../components/SectionHeading';
-import { SERVICES } from '../data/services';
 import { BRAND } from '../data/navigation';
 import { PAGE_SEO } from '../data/seo';
 import LocationMapCard from '../components/LocationMapCard';
 import { useModal } from '../context/ModalContext';
-import { MapPin, CheckCircle2, ArrowUpRight, Phone, Building2, Utensils, Stethoscope, Truck, GraduationCap } from 'lucide-react';
+import { MapPin, CheckCircle2, Building2, Utensils, Stethoscope, Truck, GraduationCap } from 'lucide-react';
 
 export default function LocalQuettaPage({ onOpenQuote }) {
   const modal = useModal();
   const handleOpenQuote = onOpenQuote || modal.openQuoteModal;
+
   const localIndustries = [
     {
       icon: Stethoscope,
@@ -145,8 +145,9 @@ export default function LocalQuettaPage({ onOpenQuote }) {
             </div>
             <div className="pt-2">
               <button
-                onClick={() => onOpenQuote()}
-                className="w-full py-3 px-4 text-xs font-semibold text-white bg-[#121316] rounded-md hover:bg-[#252830] transition-colors"
+                type="button"
+                onClick={() => handleOpenQuote()}
+                className="w-full py-3 px-4 text-xs font-semibold text-white bg-[#121316] rounded-md hover:bg-[#252830] transition-colors cursor-pointer"
               >
                 Book a Quetta Office Meeting
               </button>
@@ -204,8 +205,9 @@ export default function LocalQuettaPage({ onOpenQuote }) {
             </p>
             <div className="pt-2 flex flex-wrap gap-4">
               <button
+                type="button"
                 onClick={() => handleOpenQuote()}
-                className="px-6 py-3 text-xs font-semibold text-[#121316] bg-[#FAF8F5] rounded-md hover:bg-neutral-200 transition-colors"
+                className="px-6 py-3 text-xs font-semibold text-[#121316] bg-[#FAF8F5] rounded-md hover:bg-neutral-200 transition-colors cursor-pointer"
               >
                 Schedule Local Consultation
               </button>

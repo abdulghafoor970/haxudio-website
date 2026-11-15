@@ -132,6 +132,7 @@ export default function ImageFieldPicker({
         onSelect={handleSelectMedia}
         currentValue={value}
         defaultFolder={defaultFolder}
+        initialTab={modalDefaultTab}
         title={`Select ${label}`}
       />
     </div>

@@ -56,11 +56,11 @@ export const PROCESS_STEPS = [
     number: '04',
     name: 'Build',
     title: 'Engineering & Integration',
-    summary: 'Developing clean, modern, accessible frontends using Next.js, React, and modular component architecture.',
+    summary: 'Developing clean, modern, accessible frontends using React, Vite, Node.js, and modular component architecture.',
     timeline: 'Week 3 – 5',
     details: 'Our engineers transform approved designs into production-grade code. We write semantic HTML, configure responsive styling, implement snappy client-side transitions, and integrate clean backend endpoints.',
     deliverables: [
-      'Clean, modular React / Next.js codebase',
+      'Clean, modular React, Vite & Node.js codebase',
       'Sub-second page speeds optimized for Pakistani networks',
       'Form validation, error handling & API integration endpoints',
       'Accessible keyboard navigation & WCAG AA compliance',
@@ -114,5 +114,5 @@ export const PROCESS_STEPS = [
       'Ongoing digital marketing & social media management',
     ],
     clientRole: 'Review monthly analytics and set quarterly business expansion targets.',
-  }
+  },
 ];

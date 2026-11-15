@@ -1,12 +1,11 @@
-import { PROJECTS } from '../data/projects';
 import { authService } from './authService';
 
 const API_BASE = '/api';
 
 /**
  * Fetch all published projects from MongoDB Atlas via Express API.
- * Supports optional category and featured filters.
- * Gracefully falls back to bundled PROJECTS if API is offline or unreachable.
+ * Returns null if API/database is unreachable so callers can retain bundled fallback data,
+ * or returns the live array (including empty []) when the CMS responds cleanly.
  */
 export async function fetchPublicProjects(options = {}) {
   const { category, featured } = options;
@@ -30,7 +29,7 @@ export async function fetchPublicProjects(options = {}) {
 
     if (!res.ok) {
       console.warn(`[Public Projects API] HTTP ${res.status}`);
-      return [];
+      return null;
     }
 
     const data = await res.json();
@@ -38,16 +37,16 @@ export async function fetchPublicProjects(options = {}) {
       return data.data;
     }
 
-    return [];
+    return null;
   } catch (err) {
     console.warn('[Public Projects API Network Error]:', err.message);
-    return [];
+    return null;
   }
 }
 
 /**
  * Fetch a single published project by slug.
- * Returns null if not found or unpublished.
+ * Returns { notFound: true } on 404, or null when offline/error.
  */
 export async function fetchPublicProjectBySlug(slug) {
   if (!slug) return null;
@@ -58,6 +57,10 @@ export async function fetchPublicProjectBySlug(slug) {
         Accept: 'application/json',
       },
     });
+
+    if (res.status === 404) {
+      return { notFound: true };
+    }
 
     if (res.ok) {
       const data = await res.json();

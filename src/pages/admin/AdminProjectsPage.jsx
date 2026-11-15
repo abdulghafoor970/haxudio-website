@@ -25,7 +25,7 @@ import {
   Check,
   FolderKanban,
   Tag,
-  Image,
+  Image as ImageIcon,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import AdminNavbar from '../../components/admin/AdminNavbar';
@@ -722,6 +722,7 @@ export default function AdminProjectsPage() {
                 </p>
               </div>
               <button
+                type="button"
                 onClick={() => setIsEditorOpen(false)}
                 className="p-1.5 rounded-md text-[#8A8782] hover:text-[#FAF8F5] hover:bg-[#1E212B] transition-colors"
               >
@@ -749,6 +750,7 @@ export default function AdminProjectsPage() {
               ].map((tab) => (
                 <button
                   key={tab.id}
+                  type="button"
                   onClick={() => setActiveTab(tab.id)}
                   className={`pb-2.5 px-3 border-b-2 font-medium transition-colors cursor-pointer whitespace-nowrap ${
                     activeTab === tab.id
@@ -994,9 +996,9 @@ export default function AdminProjectsPage() {
                   <ImageFieldPicker
                     label="Project Cover Visual & Media"
                     value={formData.coverImage}
-                    onChange={(val) => setFormData({ ...formData, coverImage: val })}
+                    onChange={(val) => setFormData((prev) => ({ ...prev, coverImage: val }))}
                     altValue={formData.coverImageAlt}
-                    onAltChange={(val) => setFormData({ ...formData, coverImageAlt: val })}
+                    onAltChange={(val) => setFormData((prev) => ({ ...prev, coverImageAlt: val }))}
                     defaultFolder="haxudio/projects"
                     showAltInput={true}
                     helperText="High-resolution visual showcase for cards, heroes, and Open Graph previews."
@@ -1023,6 +1025,19 @@ export default function AdminProjectsPage() {
                         type="text"
                         value={newImageInput}
                         onChange={(e) => setNewImageInput(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            if (newImageInput.trim()) {
+                              const trimmed = newImageInput.trim();
+                              setFormData((prev) => ({
+                                ...prev,
+                                images: [...prev.images, trimmed],
+                              }));
+                              setNewImageInput('');
+                            }
+                          }
+                        }}
                         placeholder="Paste image URL and click Add..."
                         className="flex-1 px-3 py-2 bg-[#0D0E11] border border-[#252830] rounded-lg text-xs font-mono text-[#FAF8F5] focus:outline-none focus:border-[#C25E34]"
                       />
@@ -1030,10 +1045,11 @@ export default function AdminProjectsPage() {
                         type="button"
                         onClick={() => {
                           if (newImageInput.trim()) {
-                            setFormData({
-                              ...formData,
-                              images: [...formData.images, newImageInput.trim()],
-                            });
+                            const trimmed = newImageInput.trim();
+                            setFormData((prev) => ({
+                              ...prev,
+                              images: [...prev.images, trimmed],
+                            }));
                             setNewImageInput('');
                           }
                         }}
@@ -1048,11 +1064,13 @@ export default function AdminProjectsPage() {
                       onClose={() => setIsGalleryModalOpen(false)}
                       onSelect={(media) => {
                         const imgUrl = media.secureUrl || media.url;
-                        if (imgUrl && !formData.images.includes(imgUrl)) {
-                          setFormData({
-                            ...formData,
-                            images: [...formData.images, imgUrl],
-                          });
+                        if (imgUrl) {
+                          setFormData((prev) => ({
+                            ...prev,
+                            images: prev.images.includes(imgUrl)
+                              ? prev.images
+                              : [...prev.images, imgUrl],
+                          }));
                         }
                       }}
                       defaultFolder="haxudio/projects"

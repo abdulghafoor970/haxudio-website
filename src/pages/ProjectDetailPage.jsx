@@ -1,12 +1,12 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import SEOHead from '../components/SEOHead';
 import { fetchPublicProjectBySlug } from '../services/projectApi';
 import { useModal } from '../context/ModalContext';
-import { ArrowLeft, ArrowUpRight, CheckCircle2, ChevronRight, Globe, Layers, Sparkles } from 'lucide-react';
+import { ArrowLeft, ArrowUpRight, CheckCircle2, Globe, RotateCw } from 'lucide-react';
 import { getOptimizedImageUrl } from '../utils/cloudinary';
 
 export default function ProjectDetailPage({ slug: propSlug, onOpenQuote }) {
@@ -18,39 +18,45 @@ export default function ProjectDetailPage({ slug: propSlug, onOpenQuote }) {
   const [project, setProject] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [apiError, setApiError] = useState(false);
+
+  const loadProject = useCallback(async () => {
+    if (!slug) {
+      setIsLoading(false);
+      setNotFound(true);
+      return;
+    }
+    setIsLoading(true);
+    setNotFound(false);
+    setApiError(false);
+
+    try {
+      const result = await fetchPublicProjectBySlug(slug);
+      if (result && result.notFound) {
+        setProject(null);
+        setNotFound(true);
+      } else if (result && result.isPublished !== false) {
+        setProject(result);
+        setNotFound(false);
+      } else if (result && result.isPublished === false) {
+        setProject(null);
+        setNotFound(true);
+      } else {
+        setProject(null);
+        setApiError(true);
+      }
+    } catch (err) {
+      console.warn('[ProjectDetailPage] Error loading project:', err);
+      setProject(null);
+      setApiError(true);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [slug]);
 
   useEffect(() => {
-    let isMounted = true;
-    async function loadProject() {
-      if (!slug) {
-        setIsLoading(false);
-        setNotFound(true);
-        return;
-      }
-      setIsLoading(true);
-      setNotFound(false);
-
-      try {
-        const data = await fetchPublicProjectBySlug(slug);
-        if (!isMounted) return;
-        if (data && data.isPublished !== false) {
-          setProject(data);
-          setNotFound(false);
-        } else {
-          setNotFound(true);
-        }
-      } catch (err) {
-        console.warn('[ProjectDetailPage] Error loading project:', err);
-        if (isMounted) setNotFound(true);
-      } finally {
-        if (isMounted) setIsLoading(false);
-      }
-    }
     loadProject();
-    return () => {
-      isMounted = false;
-    };
-  }, [slug]);
+  }, [loadProject]);
 
   if (isLoading) {
     return (
@@ -61,12 +67,49 @@ export default function ProjectDetailPage({ slug: propSlug, onOpenQuote }) {
     );
   }
 
+  if (apiError && !project) {
+    return (
+      <>
+        <SEOHead
+          title="Case Study Unavailable | Haxudio Portfolio"
+          description="Unable to load case study right now."
+          noindex={true}
+          robotsContent="noindex, follow"
+        />
+        <div className="pt-40 pb-32 text-center max-w-lg mx-auto px-6 space-y-4">
+          <span className="font-mono text-xs font-bold text-[#C25E34]">Temporary Error</span>
+          <h1 className="font-display text-3xl font-bold text-[#121316]">Unable to Load Case Study</h1>
+          <p className="text-sm text-[#666461]">
+            Could not connect to the project catalog service right now. Please try again.
+          </p>
+          <div className="pt-4 flex items-center justify-center gap-3">
+            <button
+              type="button"
+              onClick={loadProject}
+              className="inline-flex items-center gap-2 px-5 py-2.5 text-xs font-semibold text-white bg-[#121316] rounded-md hover:bg-[#252830] cursor-pointer"
+            >
+              <RotateCw className="w-3.5 h-3.5" />
+              <span>Retry</span>
+            </button>
+            <Link
+              href="/portfolio"
+              className="inline-flex items-center gap-2 px-5 py-2.5 text-xs font-semibold text-[#121316] border border-[#121316]/15 rounded-md hover:border-[#121316]/40"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" />
+              <span>Return to Portfolio</span>
+            </Link>
+          </div>
+        </div>
+      </>
+    );
+  }
+
   if (notFound || !project) {
     return (
       <>
         <SEOHead
-          title="Case Study Not Found | Haxudio Digital Solutions"
-          description="The requested portfolio case study could not be found or has been moved."
+          title="Case Study Not Found | Haxudio Portfolio"
+          description="The requested case study does not exist or has been archived."
           noindex={true}
           robotsContent="noindex, follow"
         />
@@ -90,13 +133,16 @@ export default function ProjectDetailPage({ slug: propSlug, onOpenQuote }) {
     );
   }
 
-  const imageUrl = project.coverImage || project.image || '/src/assets/images/hero_agency_studio_1790427835770.webp';
+  const imageUrl =
+    project.coverImage ||
+    project.image ||
+    '/src/assets/images/hero_agency_studio_1790427835770.webp';
   const summaryText = project.shortDescription || project.summary || project.description || '';
   const outcomeText = project.results || project.outcome || '';
   const deliverablesList = Array.isArray(project.deliverables) ? project.deliverables : [];
   const technologiesList = Array.isArray(project.technologies) ? project.technologies : [];
   const servicesList = Array.isArray(project.services) ? project.services : [];
-  const galleryImages = Array.isArray(project.images) ? project.images : [];
+  const galleryImages = Array.isArray(project.galleryImages) ? project.galleryImages : [];
   const liveLink = project.liveUrl || project.projectUrl;
 
   const projectJsonLd = {
@@ -106,20 +152,14 @@ export default function ProjectDetailPage({ slug: propSlug, onOpenQuote }) {
         '@type': 'CreativeWork',
         name: project.title,
         headline: project.title,
-        description: summaryText,
-        image: imageUrl,
-        creator: {
-          '@type': 'LocalBusiness',
+        description: project.seoDescription || summaryText,
+        image: imageUrl.startsWith('http') ? imageUrl : `https://www.haxudio.com${imageUrl}`,
+        author: {
+          '@type': 'Organization',
           name: 'Haxudio Digital Solutions',
           url: 'https://www.haxudio.com/',
-          address: {
-            '@type': 'PostalAddress',
-            streetAddress: 'A1 City, Hazara Town, Brewery Road',
-            addressLocality: 'Quetta',
-            addressRegion: 'Balochistan',
-            addressCountry: 'PK',
-          },
         },
+        datePublished: project.year || project.completionDate || '2025',
       },
       {
         '@type': 'BreadcrumbList',
@@ -140,7 +180,7 @@ export default function ProjectDetailPage({ slug: propSlug, onOpenQuote }) {
             '@type': 'ListItem',
             position: 3,
             name: project.title,
-            item: `https://www.haxudio.com/portfolio/${project.slug}`,
+            item: `https://www.haxudio.com/portfolio/${project.slug || project.id}`,
           },
         ],
       },
@@ -150,16 +190,16 @@ export default function ProjectDetailPage({ slug: propSlug, onOpenQuote }) {
   return (
     <>
       <SEOHead
-        title={project.seoTitle || `${project.title} | Case Study | Haxudio Digital Solutions`}
+        title={project.seoTitle || `${project.title} | Haxudio Portfolio`}
         description={project.seoDescription || summaryText}
-        canonical={`https://www.haxudio.com/portfolio/${project.slug}`}
         image={imageUrl}
+        canonical={`https://www.haxudio.com/portfolio/${project.slug || project.id}`}
         jsonLd={projectJsonLd}
       />
 
       <div className="pt-32 pb-24 max-w-7xl mx-auto px-6 md:px-10">
-        {/* Breadcrumb Navigation */}
-        <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs text-[#666461] mb-8 flex-wrap">
+        {/* Breadcrumb */}
+        <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs text-[#666461] mb-8">
           <Link href="/" className="hover:text-[#121316]">Home</Link>
           <span aria-hidden="true">/</span>
           <Link href="/portfolio" className="hover:text-[#121316]">Portfolio</Link>
@@ -252,7 +292,6 @@ export default function ProjectDetailPage({ slug: propSlug, onOpenQuote }) {
 
         {/* Deliverables & Measurable Outcome */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-16">
-          {/* Deliverables List (7 cols) */}
           <div className="lg:col-span-7 bg-white border border-[#121316]/10 rounded-xl p-8 space-y-5">
             <h3 className="font-display text-2xl font-bold text-[#121316]">
               Verified Deliverables
@@ -271,7 +310,6 @@ export default function ProjectDetailPage({ slug: propSlug, onOpenQuote }) {
             )}
           </div>
 
-          {/* Measurable Outcome Card (5 cols) */}
           <div className="lg:col-span-5 bg-[#121316] text-[#FAF8F5] rounded-xl p-8 flex flex-col justify-between space-y-6">
             <div className="space-y-3">
               <span className="font-mono text-xs uppercase font-bold text-[#C25E34] tracking-wider">
@@ -300,7 +338,7 @@ export default function ProjectDetailPage({ slug: propSlug, onOpenQuote }) {
           </div>
         </div>
 
-        {/* Gallery Images (if multiple images exist) */}
+        {/* Gallery Images */}
         {galleryImages.length > 1 && (
           <div className="mb-16 space-y-6">
             <h3 className="font-display text-2xl font-bold text-[#121316]">
@@ -309,7 +347,12 @@ export default function ProjectDetailPage({ slug: propSlug, onOpenQuote }) {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {galleryImages.map((img, idx) => (
                 <div key={idx} className="rounded-xl overflow-hidden border border-[#121316]/10 shadow-sm aspect-[16/10] bg-neutral-100">
-                  <img src={img} alt={`${project.title} gallery preview ${idx + 1}`} className="w-full h-full object-cover" />
+                  <img
+                    src={getOptimizedImageUrl(img, { width: 900 })}
+                    alt={`${project.title} gallery preview ${idx + 1}`}
+                    className="w-full h-full object-cover"
+                    loading="lazy"
+                  />
                 </div>
               ))}
             </div>
@@ -317,39 +360,41 @@ export default function ProjectDetailPage({ slug: propSlug, onOpenQuote }) {
         )}
 
         {/* Technologies & Services Applied */}
-        <div className="p-8 bg-[#FAF8F5] border border-[#121316]/10 rounded-xl mb-16 space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {technologiesList.length > 0 && (
-              <div className="space-y-3">
-                <span className="text-xs uppercase tracking-wider text-[#666461] font-semibold block">
-                  Technologies & Frameworks Applied
-                </span>
-                <div className="flex flex-wrap gap-2 text-xs">
-                  {technologiesList.map((tech) => (
-                    <span key={tech} className="font-mono bg-white border border-neutral-200 px-3 py-1 rounded text-[#121316]">
-                      {tech}
-                    </span>
-                  ))}
+        {(technologiesList.length > 0 || servicesList.length > 0) && (
+          <div className="p-8 bg-[#FAF8F5] border border-[#121316]/10 rounded-xl mb-16 space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {technologiesList.length > 0 && (
+                <div className="space-y-3">
+                  <span className="text-xs uppercase tracking-wider text-[#666461] font-semibold block">
+                    Technologies & Frameworks Applied
+                  </span>
+                  <div className="flex flex-wrap gap-2 text-xs">
+                    {technologiesList.map((tech) => (
+                      <span key={tech} className="font-mono bg-white border border-neutral-200 px-3 py-1 rounded text-[#121316]">
+                        {tech}
+                      </span>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            {servicesList.length > 0 && (
-              <div className="space-y-3">
-                <span className="text-xs uppercase tracking-wider text-[#666461] font-semibold block">
-                  Related Agency Disciplines
-                </span>
-                <div className="flex flex-wrap gap-2 text-xs">
-                  {servicesList.map((srv) => (
-                    <span key={srv} className="bg-white border border-[#C25E34]/30 text-[#C25E34] px-3 py-1 rounded font-medium">
-                      {srv}
-                    </span>
-                  ))}
+              {servicesList.length > 0 && (
+                <div className="space-y-3">
+                  <span className="text-xs uppercase tracking-wider text-[#666461] font-semibold block">
+                    Related Agency Disciplines
+                  </span>
+                  <div className="flex flex-wrap gap-2 text-xs">
+                    {servicesList.map((srv) => (
+                      <span key={srv} className="bg-white border border-[#C25E34]/30 text-[#C25E34] px-3 py-1 rounded font-medium">
+                        {srv}
+                      </span>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Bottom Navigation & CTA */}
         <div className="pt-8 border-t border-[#121316]/10 flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -362,8 +407,9 @@ export default function ProjectDetailPage({ slug: propSlug, onOpenQuote }) {
           </Link>
 
           <button
+            type="button"
             onClick={() => handleOpenQuote(servicesList[0] || 'web-development')}
-            className="inline-flex items-center gap-2 px-6 py-3 text-xs font-semibold text-white bg-[#121316] rounded-md hover:bg-[#252830] transition-colors"
+            className="inline-flex items-center gap-2 px-6 py-3 text-xs font-semibold text-white bg-[#121316] rounded-md hover:bg-[#252830] transition-colors cursor-pointer"
           >
             <span>Discuss a Similar Project</span>
             <ArrowUpRight className="w-4 h-4" />

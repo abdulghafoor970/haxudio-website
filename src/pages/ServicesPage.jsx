@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
 import SEOHead from '../components/SEOHead';
 import SectionHeading from '../components/SectionHeading';
 import ServiceCard from '../components/ServiceCard';
@@ -16,7 +15,6 @@ export default function ServicesPage({ onOpenQuote }) {
   const handleOpenQuote = onOpenQuote || modal.openQuoteModal;
   const [filter, setFilter] = useState('all');
   const [services, setServices] = useState(SERVICES);
-  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -28,8 +26,6 @@ export default function ServicesPage({ onOpenQuote }) {
         }
       } catch (err) {
         console.warn('[ServicesPage] Failed to fetch dynamic services:', err);
-      } finally {
-        if (isMounted) setIsLoading(false);
       }
     }
 
@@ -71,7 +67,7 @@ export default function ServicesPage({ onOpenQuote }) {
           </p>
         </div>
 
-        {/* Filter Tabs (Interactive Segmented Control, not pill badge sandwiches) */}
+        {/* Filter Tabs (Original segmented control) */}
         <div className="flex flex-wrap items-center gap-2 p-1.5 bg-neutral-200/50 rounded-lg w-fit mb-12 border border-[#121316]/5">
           {[
             { id: 'all', label: 'All 9 Capabilities' },
@@ -81,8 +77,9 @@ export default function ServicesPage({ onOpenQuote }) {
           ].map((tab) => (
             <button
               key={tab.id}
+              type="button"
               onClick={() => setFilter(tab.id)}
-              className={`px-4 py-2 text-xs font-semibold rounded-md transition-all ${
+              className={`px-4 py-2 text-xs font-semibold rounded-md transition-all cursor-pointer ${
                 filter === tab.id
                   ? 'bg-white text-[#121316] shadow-sm'
                   : 'text-[#666461] hover:text-[#121316]'
@@ -193,8 +190,9 @@ export default function ServicesPage({ onOpenQuote }) {
             Our consultants will assess your existing platforms and advise on the most cost-effective path.
           </p>
           <button
-            onClick={handleOpenQuote}
-            className="inline-flex items-center gap-2 px-6 py-3 text-xs font-semibold text-[#FAF8F5] bg-[#121316] rounded-md hover:bg-[#252830] transition-colors"
+            type="button"
+            onClick={() => handleOpenQuote()}
+            className="inline-flex items-center gap-2 px-6 py-3 text-xs font-semibold text-[#FAF8F5] bg-[#121316] rounded-md hover:bg-[#252830] transition-colors cursor-pointer"
           >
             <span>Request a Custom Recommendation</span>
             <ArrowUpRight className="w-3.5 h-3.5" />

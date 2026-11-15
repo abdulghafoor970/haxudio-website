@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import {
   X,
   Search,
@@ -33,9 +34,10 @@ export default function MediaSelectorModal({
   onSelect,
   currentValue = '',
   defaultFolder = 'all',
+  initialTab = 'library',
   title = 'Select Image Asset',
 }) {
-  const [activeTab, setActiveTab] = useState('library'); // 'library' | 'upload' | 'direct'
+  const [activeTab, setActiveTab] = useState(initialTab); // 'library' | 'upload' | 'direct'
   const [selectedFolder, setSelectedFolder] = useState(defaultFolder);
   const [searchQuery, setSearchQuery] = useState('');
   
@@ -70,13 +72,15 @@ export default function MediaSelectorModal({
   // Check Cloudinary status & load media when opened
   useEffect(() => {
     if (isOpen) {
+      setActiveTab(initialTab || 'library');
+      setUploadError(null);
       loadMedia(1, selectedFolder, searchQuery);
       checkStatus();
       if (currentValue) {
         setDirectUrl(currentValue);
       }
     }
-  }, [isOpen]);
+  }, [isOpen, initialTab]);
 
   const checkStatus = async () => {
     const status = await fetchCloudinaryStatus();
@@ -117,7 +121,10 @@ export default function MediaSelectorModal({
   };
 
   const handleSearchSubmit = (e) => {
-    e.preventDefault();
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     loadMedia(1, selectedFolder, searchQuery);
   };
 
@@ -153,7 +160,10 @@ export default function MediaSelectorModal({
   };
 
   const handleUploadSubmit = async (e) => {
-    e.preventDefault();
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     if (!uploadFile) {
       setUploadError('Please choose an image file to upload.');
       return;
@@ -232,8 +242,11 @@ export default function MediaSelectorModal({
 
   if (!isOpen) return null;
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-xs animate-in fade-in duration-200">
+  const modalContent = (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-xs animate-in fade-in duration-200"
+      onClick={(e) => e.stopPropagation()}
+    >
       <div className="bg-[#14161C] border border-[#252830] rounded-2xl w-full max-w-5xl h-[88vh] flex flex-col shadow-2xl overflow-hidden">
         {/* Modal Header */}
         <div className="px-6 py-4 border-b border-[#252830] flex items-center justify-between bg-[#111318] shrink-0">
@@ -311,16 +324,21 @@ export default function MediaSelectorModal({
                 {/* Search & Folder Bar */}
                 <div className="p-3 border-b border-[#252830] bg-[#111318] space-y-2.5 shrink-0">
                   <div className="flex items-center gap-2">
-                    <form onSubmit={handleSearchSubmit} className="flex-1 relative">
+                    <div className="flex-1 relative">
                       <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-[#8A8782]" />
                       <input
                         type="text"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            handleSearchSubmit(e);
+                          }
+                        }}
                         placeholder="Search media by title, filename, or alt text..."
                         className="w-full pl-9 pr-3 py-1.5 bg-[#0D0E11] border border-[#252830] rounded-lg text-xs text-[#FAF8F5] focus:outline-none focus:border-[#C25E34]"
                       />
-                    </form>
+                    </div>
                     <button
                       type="button"
                       onClick={() => loadMedia(1, selectedFolder, searchQuery)}
@@ -572,7 +590,7 @@ export default function MediaSelectorModal({
                 </div>
               )}
 
-              <form onSubmit={handleUploadSubmit} className="space-y-5">
+              <div className="space-y-5">
                 {/* File Dropzone */}
                 <div
                   onClick={() => fileInputRef.current?.click()}
@@ -676,8 +694,9 @@ export default function MediaSelectorModal({
                     Back to Library
                   </button>
                   <button
-                    type="submit"
+                    type="button"
                     disabled={!uploadFile || isUploading}
+                    onClick={handleUploadSubmit}
                     className="px-6 py-2 rounded-lg bg-[#C25E34] hover:bg-[#D46B3E] text-xs font-mono font-semibold text-white transition-all flex items-center gap-2 cursor-pointer disabled:opacity-40"
                   >
                     {isUploading ? (
@@ -693,7 +712,7 @@ export default function MediaSelectorModal({
                     )}
                   </button>
                 </div>
-              </form>
+              </div>
             </div>
           )}
 
@@ -771,4 +790,9 @@ export default function MediaSelectorModal({
       </div>
     </div>
   );
+
+  if (typeof document !== 'undefined') {
+    return createPortal(modalContent, document.body);
+  }
+  return modalContent;
 }

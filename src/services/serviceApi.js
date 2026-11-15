@@ -1,11 +1,11 @@
-import { SERVICES } from '../data/services';
 import { authService } from './authService';
 
 const API_BASE = '/api';
 
 /**
  * Fetch all published services from MongoDB Atlas via Express API.
- * Gracefully falls back to bundled SERVICES if API is offline or unreachable.
+ * Returns null if API/database is unreachable so callers can retain bundled fallback data,
+ * or returns the live array (including empty []) when the CMS responds cleanly.
  */
 export async function fetchPublicServices() {
   try {
@@ -17,7 +17,7 @@ export async function fetchPublicServices() {
 
     if (!res.ok) {
       console.warn(`[Public Services API] HTTP ${res.status}`);
-      return [];
+      return null;
     }
 
     const data = await res.json();
@@ -25,16 +25,16 @@ export async function fetchPublicServices() {
       return data.data;
     }
 
-    return [];
+    return null;
   } catch (err) {
     console.warn('[Public Services API Network Error]:', err.message);
-    return [];
+    return null;
   }
 }
 
 /**
  * Fetch a single published service by slug.
- * Returns null if not found or unpublished.
+ * Returns { status: 'ok', data }, { status: 'not_found' }, or null on network/server failure.
  */
 export async function fetchPublicServiceBySlug(slug) {
   if (!slug) return null;
@@ -45,6 +45,10 @@ export async function fetchPublicServiceBySlug(slug) {
         'Accept': 'application/json',
       },
     });
+
+    if (res.status === 404) {
+      return { notFound: true };
+    }
 
     if (res.ok) {
       const data = await res.json();

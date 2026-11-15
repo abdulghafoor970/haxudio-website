@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { ArrowUpRight, ArrowDown, Sparkles, CheckCircle2, ShieldCheck, Zap } from 'lucide-react';
@@ -5,7 +7,6 @@ import { HAXUDIO_SOCIALS } from '../data/socials';
 import { SocialIcons } from './CoFoundersSlider';
 import TextReveal from './animations/TextReveal';
 import ScrollReveal from './animations/ScrollReveal';
-import ImageReveal from './animations/ImageReveal';
 import Parallax from './animations/Parallax';
 import MagneticButton from './animations/MagneticButton';
 import { StaggerContainer, StaggerItem } from './animations/StaggerContainer';
@@ -16,7 +17,9 @@ export default function Hero({ onOpenQuote, content = {} }) {
 
   const eyebrow = content?.eyebrow || 'Quetta, Balochistan · Digital Solutions Agency';
   const heading = content?.heading || 'Digital Solutions That Help Your Business Grow.';
-  const description = content?.description || 'Haxudio Digital Solutions is a Quetta-based digital agency helping businesses across Balochistan and Pakistan build stronger digital brands through web development, digital marketing, SEO, branding, design, and modern technology solutions.';
+  const description =
+    content?.description ||
+    'Haxudio Digital Solutions is a Quetta-based digital agency helping businesses across Balochistan and Pakistan build stronger digital brands through web development, digital marketing, SEO, branding, design, and modern technology solutions.';
   const primaryCtaLabel = content?.primaryCtaLabel || 'Start a Project';
   const primaryCtaUrl = content?.primaryCtaUrl || '';
   const secondaryCtaLabel = content?.secondaryCtaLabel || 'Explore Our Services';
@@ -34,7 +37,7 @@ export default function Hero({ onOpenQuote, content = {} }) {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
           {/* Left Column: Editorial Headline & Messaging (7 cols) */}
           <div className="lg:col-span-7 space-y-6">
-            {/* Eyebrow / Region Indicator */}
+            {/* Eyebrow / Region Indicator with preserved #D5FF8A pill */}
             <ScrollReveal direction="down" distance={12} delay={0}>
               <div className="inline-flex items-center px-4 py-2 sm:px-5 sm:py-2 md:px-6 md:py-2.5 rounded-full bg-[#D5FF8A] text-[#111111] font-bold text-[11px] sm:text-xs md:text-[13px] tracking-[0.10em] sm:tracking-[0.15em] md:tracking-[0.18em] uppercase max-w-full text-balance leading-normal">
                 <span>{eyebrow}</span>
@@ -73,8 +76,8 @@ export default function Hero({ onOpenQuote, content = {} }) {
                   ) : (
                     <button
                       type="button"
-                      onClick={onOpenQuote}
-                      className="btn-interactive-primary group inline-flex items-center justify-center gap-2.5 px-7 py-3.5 text-sm font-semibold rounded-md shadow-sm whitespace-nowrap active:scale-[0.98]"
+                      onClick={() => onOpenQuote?.()}
+                      className="btn-interactive-primary group inline-flex items-center justify-center gap-2.5 px-7 py-3.5 text-sm font-semibold rounded-md shadow-sm whitespace-nowrap active:scale-[0.98] cursor-pointer"
                     >
                       <span>{primaryCtaLabel}</span>
                       <ArrowUpRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1" />
@@ -187,14 +190,14 @@ export default function Hero({ onOpenQuote, content = {} }) {
             </StaggerContainer>
           </div>
 
-          {/* Right Column: Hero Visual Showcase (5 cols) with Parallax & ImageReveal */}
+          {/* Right Column: Hero Visual Showcase (5 cols) with Parallax */}
           <div className="lg:col-span-5 relative">
             <Parallax offset={20}>
               <div className="relative mx-auto max-w-md lg:max-w-none">
                 {/* Outer decorative halo ring */}
                 <div className="absolute -inset-1.5 bg-gradient-to-tr from-[#C25E34]/20 via-transparent to-[#121316]/10 rounded-xl blur-sm -z-10" />
 
-                {/* Main LCP Hero Image Carrier - Rendered immediately for optimal LCP paint with explicit aspect ratio */}
+                {/* Main LCP Hero Image Carrier */}
                 <div className="rounded-xl border border-[#121316]/10 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.15)] bg-neutral-100 overflow-hidden relative group aspect-[4/3]">
                   {isCloudinaryHero ? (
                     <img

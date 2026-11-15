@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { CO_FOUNDERS } from '../data/team';
 import { HAXUDIO_SOCIALS } from '../data/socials';
 import { fetchPublicTeam } from '../services/teamApi';
+import { getOptimizedImageUrl } from '../utils/cloudinary';
 import { MapPin, Sparkles, Quote } from 'lucide-react';
 
 // Social Media SVGs
@@ -35,10 +36,10 @@ export function SocialIcons({ socials = {}, className = 'w-4 h-4' }) {
           rel="noopener noreferrer"
           className="p-1.5 rounded-full text-neutral-500 hover:text-[#121316] hover:bg-neutral-100 transition-colors"
           title="Follow on X"
-          aria-label="X Profile"
+          aria-label="X (Twitter) Profile"
         >
           <svg className={className} viewBox="0 0 24 24" fill="currentColor">
-            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+            <path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z" />
           </svg>
         </a>
       )}
@@ -83,7 +84,7 @@ export default function CoFoundersSlider() {
   const [orderOffset, setOrderOffset] = useState(0);
   const timerRef = useRef(null);
 
-  // Load dynamic team from backend API with fallback
+  // Load dynamic team from backend API with fallback only when API unreachable (null)
   useEffect(() => {
     let isMounted = true;
     async function loadTeam() {
@@ -123,7 +124,10 @@ export default function CoFoundersSlider() {
   });
 
   const featuredMember = orderedMembers[0];
-  const featuredPhoto = featuredMember.photo || featuredMember.image || '/src/assets/images/cofounder_tech_lead_1790429560393.webp';
+  const featuredPhoto = getOptimizedImageUrl(
+    featuredMember.photo || featuredMember.image || '/src/assets/images/cofounder_tech_lead_1790429560393.webp',
+    { width: 800 }
+  );
   const featuredRole = featuredMember.position || featuredMember.role || 'Executive';
   const featuredSocials = featuredMember.socials || {
     linkedin: featuredMember.linkedin,
@@ -152,12 +156,14 @@ export default function CoFoundersSlider() {
         {/* Agency Social Network Quick Links (Instagram, X, LinkedIn, Facebook) */}
         <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto bg-white border border-[#121316]/10 px-3.5 py-1.5 rounded-full shadow-xs">
           <span className="text-[11px] font-semibold text-[#121316] mr-1">Follow Haxudio:</span>
-          <SocialIcons socials={{
-            linkedin: HAXUDIO_SOCIALS.linkedin,
-            x: HAXUDIO_SOCIALS.x,
-            instagram: HAXUDIO_SOCIALS.instagram,
-            facebook: HAXUDIO_SOCIALS.facebook,
-          }} />
+          <SocialIcons
+            socials={{
+              linkedin: HAXUDIO_SOCIALS.linkedin,
+              x: HAXUDIO_SOCIALS.x,
+              instagram: HAXUDIO_SOCIALS.instagram,
+              facebook: HAXUDIO_SOCIALS.facebook,
+            }}
+          />
         </div>
       </div>
 
@@ -227,7 +233,7 @@ export default function CoFoundersSlider() {
             <div className="relative">
               <Quote className="w-8 h-8 text-[#C25E34]/20 absolute -top-3 -left-3 pointer-events-none" />
               <p className="text-sm sm:text-base text-[#121316] leading-relaxed relative z-10 pl-2">
-                "{featuredMember.bio}"
+                &ldquo;{featuredMember.bio}&rdquo;
               </p>
             </div>
           </div>
@@ -238,7 +244,10 @@ export default function CoFoundersSlider() {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {orderedMembers.map((member, positionIdx) => {
           const isLead = positionIdx === 0;
-          const memberPhoto = member.photo || member.image || '/src/assets/images/cofounder_tech_lead_1790429560393.webp';
+          const memberPhoto = getOptimizedImageUrl(
+            member.photo || member.image || '/src/assets/images/cofounder_tech_lead_1790429560393.webp',
+            { width: 400 }
+          );
           const memberRole = member.position || member.role || 'Team';
           const memberSocials = member.socials || {
             linkedin: member.linkedin,
@@ -269,6 +278,7 @@ export default function CoFoundersSlider() {
                     src={memberPhoto}
                     alt={member.name}
                     className="w-full h-full object-cover"
+                    loading="lazy"
                   />
                 </div>
               </div>

@@ -10,7 +10,7 @@ import Footer from './Footer';
 import ScrollToTop from './ScrollToTop';
 import WhatsAppWidget from './WhatsAppWidget';
 import ScrollProgress from './animations/ScrollProgress';
-import { motion } from 'motion/react';
+import { motion, useReducedMotion } from 'motion/react';
 
 // Lazy-load interactive modals so they are not part of initial mobile paint
 const QuoteBuilderModal = lazy(() => import('./QuoteBuilderModal'));
@@ -19,6 +19,7 @@ const ProjectModal = lazy(() => import('./ProjectModal'));
 function AppShellContent({ children }) {
   const pathname = usePathname();
   const isAdminRoute = typeof pathname === 'string' && pathname.startsWith('/admin');
+  const shouldReduceMotion = useReducedMotion();
 
   const {
     isQuoteModalOpen,
@@ -46,9 +47,9 @@ function AppShellContent({ children }) {
       <main className="flex-grow">
         <motion.div
           key={pathname}
-          initial={{ opacity: 0, y: 6 }}
+          initial={shouldReduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 6 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+          transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
           className="w-full h-full"
         >
           {children}

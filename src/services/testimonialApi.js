@@ -1,11 +1,10 @@
-import { TESTIMONIALS } from '../data/testimonials';
 import { authService } from './authService';
 
 const API_BASE = '/api';
 
 /**
  * Fetch all published testimonials from MongoDB Atlas via Express API.
- * Gracefully falls back to bundled TESTIMONIALS if API is offline or unreachable.
+ * Returns null when offline/error so static preview fallback can remain intact.
  */
 export async function fetchPublicTestimonials() {
   try {
@@ -17,7 +16,7 @@ export async function fetchPublicTestimonials() {
 
     if (!res.ok) {
       console.warn(`[Public Testimonials API] HTTP ${res.status}`);
-      return [];
+      return null;
     }
 
     const data = await res.json();
@@ -25,10 +24,10 @@ export async function fetchPublicTestimonials() {
       return data.data;
     }
 
-    return [];
+    return null;
   } catch (err) {
     console.warn('[Public Testimonials API Network Error]:', err.message);
-    return [];
+    return null;
   }
 }
 

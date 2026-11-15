@@ -2,17 +2,15 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import SEOHead from '../components/SEOHead';
 import Hero from '../components/Hero';
 import PremiumMarquee from '../components/PremiumMarquee';
-import SectionHeading from '../components/SectionHeading';
+import SEOHead from '../components/SEOHead';
 import ServiceCard from '../components/ServiceCard';
 import ProjectCard from '../components/ProjectCard';
 import LocalTrustBanner from '../components/LocalTrustBanner';
 import CoFoundersSlider from '../components/CoFoundersSlider';
 import LocationMapCard from '../components/LocationMapCard';
 import { SERVICES } from '../data/services';
-import { PROJECTS } from '../data/projects';
 import { TESTIMONIALS } from '../data/testimonials';
 import { BLOG_POSTS } from '../data/blog';
 import { PAGE_SEO } from '../data/seo';
@@ -23,7 +21,7 @@ import { fetchPublicContent } from '../services/contentApi';
 import { useModal } from '../context/ModalContext';
 import { useSettings } from '../context/SettingsContext';
 import { BRAND } from '../data/navigation';
-import { ArrowUpRight, ArrowRight, Shield, Sparkles, CheckCircle2, MapPin } from 'lucide-react';
+import { ArrowUpRight, ArrowRight, Shield, Sparkles, MapPin } from 'lucide-react';
 import { getOptimizedImageUrl } from '../utils/cloudinary';
 
 // Animation primitives
@@ -39,9 +37,11 @@ export default function HomePage({ onOpenQuote, onSelectProject }) {
   const handleOpenQuote = onOpenQuote || modal.openQuoteModal;
   const handleSelectProject = onSelectProject || modal.openProjectModal;
 
-  // Initialize with initial dynamic state; audit ensures CMS overrides bundled data
   const [servicesList, setServicesList] = useState(SERVICES);
-  const [projectsList, setProjectsList] = useState(PROJECTS);
+  // Start empty with explicit loading/error state; never fall back to static PROJECTS
+  const [projectsList, setProjectsList] = useState([]);
+  const [isProjectsLoading, setIsProjectsLoading] = useState(true);
+  const [projectsError, setProjectsError] = useState(false);
   const [testimonialsList, setTestimonialsList] = useState(TESTIMONIALS);
   const [homeContent, setHomeContent] = useState({});
 
@@ -49,33 +49,49 @@ export default function HomePage({ onOpenQuote, onSelectProject }) {
     let isMounted = true;
     async function loadData() {
       try {
-        const [dynamicServices, dynamicProjects, dynamicTestimonials, dynamicContent] = await Promise.allSettled([
-          fetchPublicServices(),
-          fetchPublicProjects(),
-          fetchPublicTestimonials(),
-          fetchPublicContent('home'),
-        ]);
-        if (isMounted) {
-          if (dynamicServices.status === 'fulfilled' && Array.isArray(dynamicServices.value)) {
-            setServicesList(dynamicServices.value);
+        const [dynamicServices, dynamicProjects, dynamicTestimonials, dynamicContent] =
+          await Promise.allSettled([
+            fetchPublicServices(),
+            fetchPublicProjects(),
+            fetchPublicTestimonials(),
+            fetchPublicContent('home'),
+          ]);
+
+        if (!isMounted) return;
+
+        if (dynamicServices.status === 'fulfilled' && Array.isArray(dynamicServices.value)) {
+          setServicesList(dynamicServices.value);
+        }
+
+        if (dynamicProjects.status === 'fulfilled' && Array.isArray(dynamicProjects.value)) {
+          setProjectsList(dynamicProjects.value.filter((p) => p.isPublished !== false));
+          setProjectsError(false);
+        } else {
+          setProjectsList([]);
+          setProjectsError(true);
+        }
+        setIsProjectsLoading(false);
+
+        if (
+          dynamicTestimonials.status === 'fulfilled' &&
+          Array.isArray(dynamicTestimonials.value) &&
+          dynamicTestimonials.value.length > 0
+        ) {
+          setTestimonialsList(dynamicTestimonials.value);
+        }
+
+        if (dynamicContent.status === 'fulfilled' && dynamicContent.value?.sections) {
+          const normalized = {};
+          for (const [key, val] of Object.entries(dynamicContent.value.sections)) {
+            normalized[key.toLowerCase()] = val.content || {};
           }
-          if (dynamicProjects.status === 'fulfilled' && Array.isArray(dynamicProjects.value)) {
-            setProjectsList(dynamicProjects.value);
-          }
-          if (dynamicTestimonials.status === 'fulfilled' && Array.isArray(dynamicTestimonials.value)) {
-            setTestimonialsList(dynamicTestimonials.value);
-          }
-          if (dynamicContent.status === 'fulfilled' && dynamicContent.value?.sections) {
-            // Normalize section keys to lowercase for flexible access
-            const normalized = {};
-            for (const [key, val] of Object.entries(dynamicContent.value.sections)) {
-              normalized[key.toLowerCase()] = val.content || {};
-            }
-            setHomeContent(normalized);
-          }
+          setHomeContent(normalized);
         }
       } catch (err) {
         console.warn('[HomePage] Error loading dynamic data:', err);
+        if (isMounted) {
+          setIsProjectsLoading(false);
+        }
       }
     }
     loadData();
@@ -85,7 +101,7 @@ export default function HomePage({ onOpenQuote, onSelectProject }) {
   }, []);
 
   const featuredServices = servicesList.slice(0, 6);
-  // Sort featured projects: prioritizes featured=true, then displayOrder
+  // Sort featured projects: prioritizes featured=true, then preserves API order
   const featuredProjects = projectsList
     .filter((p) => p.featured)
     .concat(projectsList.filter((p) => !p.featured))
@@ -146,13 +162,13 @@ export default function HomePage({ onOpenQuote, onSelectProject }) {
       <SEOHead
         title={PAGE_SEO.home.title}
         description={PAGE_SEO.home.description}
+        keywords={PAGE_SEO.home.keywords}
         canonical="https://www.haxudio.com/"
-        image="https://www.haxudio.com/og-image.jpg"
         jsonLd={organizationJsonLd}
       />
 
-      {/* 1. Hero Section with Cinematic Reveals */}
-      <Hero content={homeContent.hero} onOpenQuote={handleOpenQuote} />
+      {/* 1. Hero Section with Animated Entrance & Line Reveals */}
+      <Hero content={homeContent.hero} onOpenQuote={() => handleOpenQuote()} />
 
       {/* 2. Positioning / Agency Guarantee */}
       <section className="border-y border-[#121316]/10 bg-white py-8">
@@ -164,7 +180,8 @@ export default function HomePage({ onOpenQuote, onSelectProject }) {
                   {homeContent.guarantee?.eyebrow || 'Our Guarantee'}
                 </span>
                 <p className="font-display text-lg sm:text-xl font-bold text-[#121316]">
-                  {homeContent.guarantee?.heading || 'Modern engineering tailored for Balochistan and expanding across Pakistan.'}
+                  {homeContent.guarantee?.heading ||
+                    'Modern engineering tailored for Balochistan and expanding across Pakistan.'}
                 </p>
               </div>
               <div className="flex items-center gap-6 text-xs text-[#666461] shrink-0">
@@ -222,7 +239,7 @@ export default function HomePage({ onOpenQuote, onSelectProject }) {
         </StaggerContainer>
       </section>
 
-      {/* Services Marquee: Moving strip under Service cards (Desktop only >=768px, unmounted on mobile <768px) */}
+      {/* Services Marquee */}
       <PremiumMarquee showDualStrip={true} variant="light" className="my-2" />
 
       {/* 5. Selected Work / Case Studies */}
@@ -266,19 +283,59 @@ export default function HomePage({ onOpenQuote, onSelectProject }) {
             </div>
           </ScrollReveal>
 
-          {/* 3 Featured Projects Showcase Grid with Stagger */}
-          <StaggerContainer stagger={0.1} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {featuredProjects.map((project, index) => (
-              <StaggerItem key={project.id || project._id || project.slug || `featured-proj-${index}`}>
-                <ProjectCard
-                  project={project}
-                  onSelect={handleSelectProject}
-                />
-              </StaggerItem>
-            ))}
-          </StaggerContainer>
+          {/* 3 Featured Projects Showcase Grid — strictly driven by live CMS data */}
+          {isProjectsLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {[0, 1, 2].map((skeleton) => (
+                <div
+                  key={skeleton}
+                  className="rounded-lg bg-white border border-[#121316]/10 overflow-hidden animate-pulse"
+                >
+                  <div className="aspect-[16/10] bg-neutral-200" />
+                  <div className="p-6 space-y-3">
+                    <div className="h-3 w-24 bg-neutral-200 rounded" />
+                    <div className="h-5 w-3/4 bg-neutral-200 rounded" />
+                    <div className="h-3 w-full bg-neutral-200 rounded" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : featuredProjects.length > 0 ? (
+            <StaggerContainer stagger={0.1} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {featuredProjects.map((project, index) => (
+                <StaggerItem key={project.id || project._id || project.slug || `featured-proj-${index}`}>
+                  <ProjectCard
+                    project={project}
+                    onSelect={handleSelectProject}
+                  />
+                </StaggerItem>
+              ))}
+            </StaggerContainer>
+          ) : (
+            <div className="p-10 bg-white border border-[#121316]/10 rounded-xl text-center space-y-3">
+              <p className="font-display text-lg font-bold text-[#121316]">
+                {projectsError
+                  ? 'Portfolio Case Studies Temporarily Unavailable'
+                  : 'No Published Case Studies Yet'}
+              </p>
+              <p className="text-xs sm:text-sm text-[#666461] max-w-md mx-auto">
+                {projectsError
+                  ? 'Could not reach the project catalog service right now. Please try viewing the portfolio page.'
+                  : 'Published projects managed in the Portfolio CMS will appear here automatically.'}
+              </p>
+              <div className="pt-2">
+                <Link
+                  href="/portfolio"
+                  className="btn-interactive-primary inline-flex items-center gap-1.5 px-5 py-2.5 text-xs font-semibold rounded-md"
+                >
+                  <span>Visit Portfolio</span>
+                  <ArrowUpRight className="w-3.5 h-3.5" />
+                </Link>
+              </div>
+            </div>
+          )}
 
-          {/* Quick Action Bar to Explore All Services & Projects */}
+          {/* Quick Action Bar */}
           <ScrollReveal direction="up" distance={16} delay={0.2} className="mt-10">
             <div className="p-5 bg-white border border-[#121316]/10 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 card-hover-fx">
               <div className="space-y-1">
@@ -301,7 +358,7 @@ export default function HomePage({ onOpenQuote, onSelectProject }) {
             </div>
           </ScrollReveal>
 
-          {/* Co-Founders Round Slider (Sliding left-to-right every 3 seconds) */}
+          {/* Co-Founders Round Slider */}
           <ScrollReveal direction="up" distance={20} delay={0.1}>
             <CoFoundersSlider />
           </ScrollReveal>
@@ -318,7 +375,7 @@ export default function HomePage({ onOpenQuote, onSelectProject }) {
                 <StaggerItem key={t._id || t.id || `testimonial-${index}`}>
                   <div className="space-y-4">
                     <p className="text-xs sm:text-sm text-[#121316] italic leading-relaxed">
-                      "{quoteText}"
+                      &ldquo;{quoteText}&rdquo;
                     </p>
                     <div className="text-xs text-[#666461]">
                       <p className="font-semibold text-[#121316]">{authorName}</p>
@@ -350,7 +407,8 @@ export default function HomePage({ onOpenQuote, onSelectProject }) {
                 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-[#121316] leading-[1.15] text-balance"
               />
               <p className="text-base sm:text-lg text-[#666461] leading-relaxed">
-                {homeContent.agencyintro?.description || 'From Quetta to businesses across Pakistan, Haxudio Digital Solutions provides modern digital services designed to help businesses establish, improve, and grow their online presence. We work with startups, retailers, restaurants, hotels, professional services, and other businesses looking to strengthen their digital presence.'}
+                {homeContent.agencyintro?.description ||
+                  'From Quetta to businesses across Pakistan, Haxudio Digital Solutions provides modern digital services designed to help businesses establish, improve, and grow their online presence. We work with startups, retailers, restaurants, hotels, professional services, and other businesses looking to strengthen their digital presence.'}
               </p>
               <p className="text-sm text-[#666461] leading-relaxed">
                 Whether you need a full-scale web development company in Quetta, an SEO agency to improve your Google search rankings, or a dedicated digital marketing partner in Pakistan, our team combines engineering rigor with creative precision to deliver measurable commercial results.
@@ -397,7 +455,10 @@ export default function HomePage({ onOpenQuote, onSelectProject }) {
               <Parallax offset={16}>
                 <div className="relative aspect-[4/3] rounded-xl overflow-hidden border border-[#121316]/10 shadow-lg bg-neutral-100 group">
                   <img
-                    src={getOptimizedImageUrl(homeContent.agencyintro?.hubImageUrl || '/src/assets/images/haxudio_quetta_hub_1790427878986.webp', { width: 768 })}
+                    src={getOptimizedImageUrl(
+                      homeContent.agencyintro?.hubImageUrl || '/src/assets/images/haxudio_quetta_hub_1790427878986.webp',
+                      { width: 768 }
+                    )}
                     alt="Haxudio Digital Solutions digital agency headquarters in Quetta Balochistan"
                     width="1376"
                     height="768"
@@ -420,7 +481,6 @@ export default function HomePage({ onOpenQuote, onSelectProject }) {
             </div>
           </div>
 
-          {/* Interactive Location Map Card with Google Business Profile & ScrollReveal */}
           <ScrollReveal direction="up" distance={20} delay={0.15}>
             <LocationMapCard className="mt-12" />
           </ScrollReveal>
@@ -430,7 +490,7 @@ export default function HomePage({ onOpenQuote, onSelectProject }) {
       {/* 8. Local Trust & Regional Roots Banner */}
       <LocalTrustBanner />
 
-      {/* 9. Latest Digital Insights from Blog with Staggered Entrance */}
+      {/* 9. Latest Digital Insights from Blog */}
       <section className="py-24 max-w-7xl mx-auto px-6 md:px-10">
         <ScrollReveal direction="up" distance={20} className="mb-12">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
@@ -510,7 +570,8 @@ export default function HomePage({ onOpenQuote, onSelectProject }) {
 
           <ScrollReveal direction="up" distance={20} delay={0.2}>
             <p className="text-base sm:text-lg text-neutral-400 max-w-2xl mx-auto leading-relaxed">
-              {homeContent.finalcta?.description || 'Whether you need a custom corporate website, a brand identity refresh, or a targeted search engine campaign in Quetta, our engineers and designers are ready to assist.'}
+              {homeContent.finalcta?.description ||
+                'Whether you need a custom corporate website, a brand identity refresh, or a targeted search engine campaign in Quetta, our engineers and designers are ready to assist.'}
             </p>
           </ScrollReveal>
 
@@ -527,8 +588,9 @@ export default function HomePage({ onOpenQuote, onSelectProject }) {
                   </Link>
                 ) : (
                   <button
-                    onClick={handleOpenQuote}
-                    className="btn-interactive-primary group inline-flex items-center gap-2 px-8 py-3.5 text-sm font-semibold rounded-md shadow-sm active:scale-[0.98]"
+                    type="button"
+                    onClick={() => handleOpenQuote()}
+                    className="btn-interactive-primary group inline-flex items-center gap-2 px-8 py-3.5 text-sm font-semibold rounded-md shadow-sm active:scale-[0.98] cursor-pointer"
                   >
                     <span>{homeContent.finalcta?.buttonLabel || 'Start a Project'}</span>
                     <ArrowUpRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1" />

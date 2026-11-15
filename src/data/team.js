@@ -10,9 +10,9 @@ export const CO_FOUNDERS = [
     discipline: 'Full-Stack Architecture & Systems',
     image: '/src/assets/images/cofounder_tech_lead_1790429560393.webp',
     location: 'Quetta, Balochistan',
-    bio: 'Leads engineering and cloud infrastructure at Haxudio. Specializes in custom Next.js web applications, sub-second latency optimization, and accessible software architectures.',
+    bio: 'Leads engineering and cloud infrastructure at Haxudio. Specializes in custom React & full-stack web applications, sub-second latency optimization, and accessible software architectures.',
     badge: 'Tech & Architecture',
-    highlight: 'Next.js · React · Cloud Architecture',
+    highlight: 'React · Full-Stack · Cloud Architecture',
     socials: {
       linkedin: 'https://www.linkedin.com/company/haxudio',
       x: 'https://x.com/haxudio',

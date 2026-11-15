@@ -15,7 +15,9 @@ export default function Footer() {
   const [newsletterStatus, setNewsletterStatus] = useState({ state: 'idle', message: '' });
 
   const businessName = settings?.business?.businessName || BRAND.name;
-  const businessDescription = settings?.business?.description || 'A modern digital solutions agency based in Quetta, Balochistan. We engineer high-performance web systems, brand identities, SEO architecture, and growth strategies for ambitious businesses across Pakistan.';
+  const businessDescription =
+    settings?.business?.description ||
+    'A modern digital solutions agency based in Quetta, Balochistan. We engineer high-performance web systems, brand identities, SEO architecture, and growth strategies for ambitious businesses across Pakistan.';
   const address = settings?.contact?.address || BRAND.address;
   const mapUrl = settings?.contact?.mapUrl || HAXUDIO_SOCIALS.googleBusinessProfile;
   const workingHours = settings?.business?.workingHours || BRAND.workingHours;
@@ -42,7 +44,7 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-6 md:px-10">
         {/* Main 4-column layout */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-12 pb-16 border-b border-white/10">
-          {/* Column 1: Brand & Agency Identity (5 cols) */}
+          {/* Column 1: Brand & Agency Identity (4 cols) */}
           <div className="lg:col-span-4 space-y-5">
             <Link
               href="/"
@@ -173,13 +175,14 @@ export default function Footer() {
                   value={newsletterEmail}
                   onChange={(e) => setNewsletterEmail(e.target.value)}
                   placeholder="Enter work email"
+                  aria-label="Enter work email for Digital Insights newsletter"
                   required
                   className="w-full px-3.5 py-2 text-xs bg-white/5 border border-white/15 rounded-l-md text-white placeholder-neutral-500 focus:outline-none focus:border-white/40"
                 />
                 <button
                   type="submit"
                   disabled={newsletterStatus.state === 'loading'}
-                  className="px-3.5 py-2 text-xs font-semibold bg-[#FAF8F5] text-[#121316] rounded-r-md hover:bg-neutral-200 transition-colors whitespace-nowrap"
+                  className="px-3.5 py-2 text-xs font-semibold bg-[#FAF8F5] text-[#121316] rounded-r-md hover:bg-neutral-200 transition-colors whitespace-nowrap cursor-pointer"
                 >
                   {newsletterStatus.state === 'loading' ? 'Joining...' : 'Subscribe'}
                 </button>
@@ -208,10 +211,17 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* Bottom bar: Copyright, Location confirmation, Zero-pill cleanliness */}
+        {/* Bottom bar: Copyright, subtle clickable ★ admin link left of Quetta location */}
         <div className="pt-8 flex flex-col md:flex-row items-center justify-between text-xs text-neutral-400 gap-4">
           <p>© {new Date().getFullYear()} {businessName}. All rights reserved.</p>
           <div className="flex items-center gap-3">
+            <Link
+              href="/admin/login"
+              aria-label="Admin Portal"
+              className="text-white/15 hover:text-white/45 transition-colors text-[10px] leading-none p-1 select-none"
+            >
+              ★
+            </Link>
             <span>Quetta, Balochistan, Pakistan</span>
             <span aria-hidden="true">·</span>
             <span>Serving Clients Nationwide</span>

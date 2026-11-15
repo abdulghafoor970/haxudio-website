@@ -8,6 +8,34 @@ import { BLOG_POSTS } from '../data/blog';
 import { useModal } from '../context/ModalContext';
 import { ArrowLeft, ArrowUpRight, Clock, Calendar, User, Tag } from 'lucide-react';
 
+/**
+ * Safely parse inline markdown markers (**bold** and `code`)
+ * without dangerouslySetInnerHTML so article prose never displays literal asterisks.
+ */
+function renderInlineFormatting(text) {
+  const tokens = String(text || '').split(/(\*\*[^*]+\*\*|`[^`]+`)/g);
+  return tokens.map((token, idx) => {
+    if (token.startsWith('**') && token.endsWith('**') && token.length > 4) {
+      return (
+        <strong key={idx} className="font-semibold text-[#121316]">
+          {token.slice(2, -2)}
+        </strong>
+      );
+    }
+    if (token.startsWith('`') && token.endsWith('`') && token.length > 2) {
+      return (
+        <code
+          key={idx}
+          className="font-mono text-[0.9em] bg-[#F4F1EA] px-1.5 py-0.5 rounded text-[#121316]"
+        >
+          {token.slice(1, -1)}
+        </code>
+      );
+    }
+    return <React.Fragment key={idx}>{token}</React.Fragment>;
+  });
+}
+
 export default function BlogPostPage({ slug: propSlug, onOpenQuote }) {
   const urlParams = useParams();
   const slug = propSlug || urlParams?.slug;
@@ -49,24 +77,19 @@ export default function BlogPostPage({ slug: propSlug, onOpenQuote }) {
     '@context': 'https://schema.org',
     '@graph': [
       {
-        '@type': 'BlogPosting',
+        '@type': 'Article',
         headline: post.title,
-        description: post.excerpt,
-        datePublished: post.publishedDate,
+        description: post.seoDescription || post.excerpt,
         author: {
           '@type': 'Organization',
-          name: 'Haxudio Digital Solutions',
-          url: 'https://www.haxudio.com/',
+          name: post.author || 'Haxudio Editorial Team',
         },
         publisher: {
           '@type': 'Organization',
           name: 'Haxudio Digital Solutions',
           url: 'https://www.haxudio.com/',
-          logo: {
-            '@type': 'ImageObject',
-            url: 'https://www.haxudio.com/og-image.jpg',
-          },
         },
+        datePublished: post.publishedDate,
       },
       {
         '@type': 'BreadcrumbList',
@@ -97,8 +120,8 @@ export default function BlogPostPage({ slug: propSlug, onOpenQuote }) {
   return (
     <>
       <SEOHead
-        title={`${post.title} | Haxudio Digital Insights`}
-        description={post.excerpt}
+        title={post.seoTitle || post.title}
+        description={post.seoDescription || post.excerpt}
         canonical={`https://www.haxudio.com/blog/${post.slug}`}
         jsonLd={blogJsonLd}
       />
@@ -147,7 +170,7 @@ export default function BlogPostPage({ slug: propSlug, onOpenQuote }) {
           </div>
         </header>
 
-        {/* Post Body (Clean Editorial Prose) */}
+        {/* Post Body (Clean Editorial Prose with safe inline markdown formatting) */}
         <div className="prose prose-neutral max-w-none space-y-6 text-[#121316] text-sm sm:text-base leading-relaxed">
           {post.content.split('\n\n').map((paragraph, index) => {
             const trimmed = paragraph.trim();
@@ -159,17 +182,17 @@ export default function BlogPostPage({ slug: propSlug, onOpenQuote }) {
                   key={index}
                   className="font-display text-2xl font-bold text-[#121316] pt-6 pb-2 border-b border-neutral-100"
                 >
-                  {trimmed.replace('### ', '')}
+                  {renderInlineFormatting(trimmed.replace('### ', ''))}
                 </h2>
               );
             }
 
             if (trimmed.startsWith('- ')) {
-              const items = trimmed.split('\n- ').map((i) => i.replace('- ', ''));
+              const items = trimmed.split('\n- ').map((i) => i.replace(/^- /, ''));
               return (
                 <ul key={index} className="space-y-2 pl-4 list-disc text-[#121316]/90">
                   {items.map((item, idx) => (
-                    <li key={idx}>{item}</li>
+                    <li key={idx}>{renderInlineFormatting(item)}</li>
                   ))}
                 </ul>
               );
@@ -177,7 +200,7 @@ export default function BlogPostPage({ slug: propSlug, onOpenQuote }) {
 
             return (
               <p key={index} className="text-[#121316]/90 leading-relaxed">
-                {trimmed}
+                {renderInlineFormatting(trimmed)}
               </p>
             );
           })}
@@ -188,7 +211,7 @@ export default function BlogPostPage({ slug: propSlug, onOpenQuote }) {
           <div className="mt-12 pt-6 border-t border-neutral-200 flex items-center gap-3 text-xs text-[#666461]">
             <Tag className="w-3.5 h-3.5" />
             <span>Topics:</span>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               {post.tags.map((t, idx) => (
                 <React.Fragment key={t}>
                   <span className="text-[#121316]">{t}</span>
@@ -210,8 +233,9 @@ export default function BlogPostPage({ slug: propSlug, onOpenQuote }) {
             </p>
           </div>
           <button
+            type="button"
             onClick={() => handleOpenQuote()}
-            className="shrink-0 inline-flex items-center gap-1.5 px-5 py-3 text-xs font-semibold text-[#121316] bg-[#FAF8F5] rounded-md hover:bg-neutral-200 transition-colors"
+            className="shrink-0 inline-flex items-center gap-1.5 px-5 py-3 text-xs font-semibold text-[#121316] bg-[#FAF8F5] rounded-md hover:bg-neutral-200 transition-colors cursor-pointer"
           >
             <span>Start a Consultation</span>
             <ArrowUpRight className="w-3.5 h-3.5" />

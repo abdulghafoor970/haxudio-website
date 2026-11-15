@@ -15,7 +15,13 @@ import HaxudioLogo from './HaxudioLogo';
 export default function Navbar({ onOpenQuote }) {
   const location = usePathname();
   const { openQuoteModal } = useModal();
-  const handleQuoteClick = onOpenQuote || openQuoteModal;
+  const handleQuoteClick = () => {
+    if (onOpenQuote) {
+      onOpenQuote();
+    } else {
+      openQuoteModal('web-development');
+    }
+  };
   const scrollPosition = useScrollPosition();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -28,13 +34,14 @@ export default function Navbar({ onOpenQuote }) {
 
   // Prevent background scroll when mobile menu is active
   useEffect(() => {
+    const prevOverflow = document.body.style.overflow;
     if (mobileMenuOpen) {
       document.body.style.overflow = 'hidden';
     } else {
-      document.body.style.overflow = '';
+      document.body.style.overflow = prevOverflow || '';
     }
     return () => {
-      document.body.style.overflow = '';
+      document.body.style.overflow = prevOverflow;
     };
   }, [mobileMenuOpen]);
 
@@ -48,7 +55,7 @@ export default function Navbar({ onOpenQuote }) {
         }`}
       >
         <div className="max-w-7xl mx-auto px-6 md:px-10 flex items-center justify-between">
-          {/* Zone 1: Brand wordmark with official logo emblem */}
+          {/* Zone 1: Brand wordmark with enlarged official logo emblem */}
           <Link
             href="/"
             className="flex items-center gap-1 sm:gap-1.5 group hover:opacity-90 transition-opacity"
@@ -66,11 +73,13 @@ export default function Navbar({ onOpenQuote }) {
             className="hidden md:flex items-center gap-7 text-sm font-medium text-[#121316]/80"
           >
             {NAV_LINKS.map((item) => {
-              const isActive = location === item.href || (item.href !== '/' && location.startsWith(item.href));
+              const isActive =
+                location === item.href || (item.href !== '/' && location.startsWith(item.href));
               return (
                 <Link
                   key={item.name}
                   href={item.href}
+                  aria-current={isActive ? 'page' : undefined}
                   className={`relative py-1 transition-colors hover:text-[#121316] ${
                     isActive ? 'text-[#121316] font-semibold' : 'text-[#666461]'
                   }`}
@@ -87,18 +96,22 @@ export default function Navbar({ onOpenQuote }) {
           {/* Zone 3: 1–2 primary actions + Social links */}
           <div className="flex items-center gap-3">
             <div className="hidden lg:flex items-center border-r border-[#121316]/10 pr-2">
-              <SocialIcons socials={{
-                linkedin: HAXUDIO_SOCIALS.linkedin,
-                x: HAXUDIO_SOCIALS.x,
-                instagram: HAXUDIO_SOCIALS.instagram,
-                facebook: HAXUDIO_SOCIALS.facebook,
-              }} className="w-3.5 h-3.5" />
+              <SocialIcons
+                socials={{
+                  linkedin: HAXUDIO_SOCIALS.linkedin,
+                  x: HAXUDIO_SOCIALS.x,
+                  instagram: HAXUDIO_SOCIALS.instagram,
+                  facebook: HAXUDIO_SOCIALS.facebook,
+                }}
+                className="w-3.5 h-3.5"
+              />
             </div>
 
             <MagneticButton strength={0.18} maxOffset={4}>
               <button
+                type="button"
                 onClick={handleQuoteClick}
-                className="btn-interactive-primary group hidden sm:inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold rounded-md shadow-sm whitespace-nowrap active:scale-[0.98]"
+                className="btn-interactive-primary group hidden sm:inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold rounded-md shadow-sm whitespace-nowrap active:scale-[0.98] cursor-pointer"
               >
                 <span>Start a Project</span>
                 <ArrowUpRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
@@ -108,8 +121,8 @@ export default function Navbar({ onOpenQuote }) {
             {/* Mobile menu trigger */}
             <button
               type="button"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-2 text-[#121316] hover:bg-[#121316]/5 rounded-md transition-colors"
+              onClick={() => setMobileMenuOpen((prev) => !prev)}
+              className="md:hidden p-2 text-[#121316] hover:bg-[#121316]/5 rounded-md transition-colors cursor-pointer"
               aria-expanded={mobileMenuOpen}
               aria-label="Toggle Navigation Menu"
             >
@@ -121,12 +134,16 @@ export default function Navbar({ onOpenQuote }) {
 
       {/* Mobile Drawer Overlay */}
       {mobileMenuOpen && (
-        <div className="fixed inset-0 z-50 md:hidden bg-[#121316]/50 backdrop-blur-sm animate-fade-in">
+        <div
+          className="fixed inset-0 z-50 md:hidden bg-[#121316]/50 backdrop-blur-sm animate-fade-in"
+          onClick={() => setMobileMenuOpen(false)}
+        >
           <div
-            className="fixed top-0 right-0 bottom-0 w-full max-w-xs bg-[#FAF8F5] p-6 shadow-2xl flex flex-col justify-between"
+            className="fixed top-0 right-0 bottom-0 w-full max-w-xs bg-[#FAF8F5] p-6 shadow-2xl flex flex-col justify-between overflow-y-auto"
             role="dialog"
             aria-modal="true"
             aria-label="Mobile Navigation"
+            onClick={(e) => e.stopPropagation()}
           >
             <div>
               <div className="flex items-center justify-between pb-6 border-b border-[#121316]/10">
@@ -144,7 +161,7 @@ export default function Navbar({ onOpenQuote }) {
                 <button
                   type="button"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="p-1.5 text-[#121316] hover:bg-[#121316]/5 rounded-md"
+                  className="p-1.5 text-[#121316] hover:bg-[#121316]/5 rounded-md cursor-pointer"
                   aria-label="Close Navigation Menu"
                 >
                   <X className="w-5 h-5" />
@@ -153,11 +170,13 @@ export default function Navbar({ onOpenQuote }) {
 
               <nav className="flex flex-col gap-4 mt-6">
                 {NAV_LINKS.map((item) => {
-                  const isActive = location === item.href || (item.href !== '/' && location.startsWith(item.href));
+                  const isActive =
+                    location === item.href || (item.href !== '/' && location.startsWith(item.href));
                   return (
                     <Link
                       key={item.name}
                       href={item.href}
+                      aria-current={isActive ? 'page' : undefined}
                       onClick={() => setMobileMenuOpen(false)}
                       className={`text-lg font-medium py-1 transition-colors ${
                         isActive ? 'text-[#121316] font-bold' : 'text-[#666461] hover:text-[#121316]'
@@ -179,11 +198,12 @@ export default function Navbar({ onOpenQuote }) {
 
             <div className="pt-6 border-t border-[#121316]/10 space-y-4">
               <button
+                type="button"
                 onClick={() => {
                   setMobileMenuOpen(false);
                   handleQuoteClick();
                 }}
-                className="w-full py-3 px-4 text-center text-sm font-semibold text-[#FAF8F5] bg-[#121316] rounded-md hover:bg-[#252830] transition-colors"
+                className="w-full py-3 px-4 text-center text-sm font-semibold text-[#FAF8F5] bg-[#121316] rounded-md hover:bg-[#252830] transition-colors cursor-pointer"
               >
                 Start a Project
               </button>
@@ -197,12 +217,15 @@ export default function Navbar({ onOpenQuote }) {
                 <span className="block text-[11px] uppercase tracking-wider font-semibold text-[#121316] mb-1.5">
                   Follow Haxudio
                 </span>
-                <SocialIcons socials={{
-                  linkedin: HAXUDIO_SOCIALS.linkedin,
-                  x: HAXUDIO_SOCIALS.x,
-                  instagram: HAXUDIO_SOCIALS.instagram,
-                  facebook: HAXUDIO_SOCIALS.facebook,
-                }} className="w-4 h-4" />
+                <SocialIcons
+                  socials={{
+                    linkedin: HAXUDIO_SOCIALS.linkedin,
+                    x: HAXUDIO_SOCIALS.x,
+                    instagram: HAXUDIO_SOCIALS.instagram,
+                    facebook: HAXUDIO_SOCIALS.facebook,
+                  }}
+                  className="w-4 h-4"
+                />
               </div>
             </div>
           </div>

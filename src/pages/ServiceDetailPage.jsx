@@ -8,7 +8,7 @@ import SectionHeading from '../components/SectionHeading';
 import { SERVICES } from '../data/services';
 import { fetchPublicServiceBySlug } from '../services/serviceApi';
 import { useModal } from '../context/ModalContext';
-import { ArrowLeft, ArrowUpRight, CheckCircle2, ChevronRight, HelpCircle } from 'lucide-react';
+import { ArrowLeft, ArrowUpRight, CheckCircle2, HelpCircle } from 'lucide-react';
 import { getOptimizedImageUrl } from '../utils/cloudinary';
 
 export default function ServiceDetailPage({ slug: propSlug, onOpenQuote }) {
@@ -30,17 +30,23 @@ export default function ServiceDetailPage({ slug: propSlug, onOpenQuote }) {
         setNotFound(true);
         return;
       }
-      setIsLoading(true);
       setNotFound(false);
+      if (!SERVICES.find((s) => s.slug === slug)) {
+        setIsLoading(true);
+      }
 
       try {
-        const dynamicService = await fetchPublicServiceBySlug(slug);
+        const result = await fetchPublicServiceBySlug(slug);
         if (!isMounted) return;
-        if (dynamicService && dynamicService.isPublished !== false) {
-          setService(dynamicService);
+
+        if (result && result.notFound) {
+          setService(null);
+          setNotFound(true);
+        } else if (result && result.isPublished !== false) {
+          setService(result);
           setNotFound(false);
         } else {
-          // Check static data as secondary fallback for verified slugs
+          // API/DB unreachable (null): fall back to static definition if slug exists
           const fallback = SERVICES.find((s) => s.slug === slug);
           if (fallback) {
             setService(fallback);
@@ -53,30 +59,32 @@ export default function ServiceDetailPage({ slug: propSlug, onOpenQuote }) {
       } catch (err) {
         console.warn('[ServiceDetailPage] Error fetching dynamic service:', err);
         const fallback = SERVICES.find((s) => s.slug === slug);
-        if (fallback) {
-          setService(fallback);
-          setNotFound(false);
-        } else {
-          setService(null);
-          setNotFound(true);
+        if (isMounted) {
+          if (fallback) {
+            setService(fallback);
+            setNotFound(false);
+          } else {
+            setService(null);
+            setNotFound(true);
+          }
         }
       } finally {
         if (isMounted) setIsLoading(false);
       }
     }
+
     loadService();
     return () => {
       isMounted = false;
     };
   }, [slug]);
 
-  // Genuine Not Found UI for invalid service slugs
   if (notFound || (!service && !isLoading)) {
     return (
       <>
         <SEOHead
           title="Service Not Found | Haxudio Digital Solutions"
-          description="The requested digital service could not be found or has been moved."
+          description="The requested service page does not exist or has been relocated."
           noindex={true}
           robotsContent="noindex, follow"
         />
@@ -182,7 +190,7 @@ export default function ServiceDetailPage({ slug: propSlug, onOpenQuote }) {
       />
 
       <div className="pt-32 pb-24 max-w-7xl mx-auto px-6 md:px-10">
-        {/* Breadcrumb Navigation (Unboxed text metadata) */}
+        {/* Breadcrumb Navigation */}
         <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs text-[#666461] mb-8">
           <Link href="/" className="hover:text-[#121316]">Home</Link>
           <span aria-hidden="true">/</span>
@@ -213,8 +221,9 @@ export default function ServiceDetailPage({ slug: propSlug, onOpenQuote }) {
 
           <div className="pt-2 flex flex-wrap items-center gap-4">
             <button
-              onClick={() => onOpenQuote(service.id)}
-              className="btn-interactive-primary group inline-flex items-center gap-2 px-6 py-3.5 text-xs font-semibold rounded-md shadow-xs"
+              type="button"
+              onClick={() => handleOpenQuote(service.slug || service.id)}
+              className="btn-interactive-primary group inline-flex items-center gap-2 px-6 py-3.5 text-xs font-semibold rounded-md shadow-xs cursor-pointer"
             >
               <span>Get Estimate for {service.title}</span>
               <ArrowUpRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1" />
@@ -281,7 +290,6 @@ export default function ServiceDetailPage({ slug: propSlug, onOpenQuote }) {
 
         {/* Benefits & Deliverables Dual Column */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 mb-20">
-          {/* Benefits (6 cols) */}
           <div className="lg:col-span-6 space-y-6">
             <h2 className="font-display text-2xl sm:text-3xl font-bold text-[#121316]">
               Core Commercial Benefits
@@ -305,7 +313,6 @@ export default function ServiceDetailPage({ slug: propSlug, onOpenQuote }) {
             )}
           </div>
 
-          {/* Deliverables (6 cols) */}
           <div className="lg:col-span-6 bg-white border border-[#121316]/10 p-8 rounded-lg space-y-5">
             <h2 className="font-display text-2xl font-bold text-[#121316]">
               What You Receive (Deliverables)
@@ -336,7 +343,7 @@ export default function ServiceDetailPage({ slug: propSlug, onOpenQuote }) {
           </div>
         </div>
 
-        {/* 4-Step Process for this Service */}
+        {/* 4-Step Process */}
         {service.process && service.process.length > 0 && (
           <div className="mb-20">
             <SectionHeading
@@ -394,7 +401,7 @@ export default function ServiceDetailPage({ slug: propSlug, onOpenQuote }) {
           </div>
         )}
 
-        {/* Service Switcher / Navigation to other services */}
+        {/* Service Switcher */}
         <div className="pt-12 border-t border-[#121316]/10 flex flex-col sm:flex-row items-center justify-between gap-4">
           <Link
             href="/services"
@@ -405,8 +412,9 @@ export default function ServiceDetailPage({ slug: propSlug, onOpenQuote }) {
           </Link>
 
           <button
+            type="button"
             onClick={() => handleOpenQuote(service.slug || service.id)}
-            className="inline-flex items-center gap-1.5 px-6 py-2.5 text-xs font-semibold text-white bg-[#121316] rounded-md hover:bg-[#252830]"
+            className="inline-flex items-center gap-1.5 px-6 py-2.5 text-xs font-semibold text-white bg-[#121316] rounded-md hover:bg-[#252830] cursor-pointer"
           >
             <span>Start a Project for {service.title}</span>
             <ArrowUpRight className="w-3.5 h-3.5" />

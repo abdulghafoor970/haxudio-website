@@ -1,11 +1,10 @@
-import { CO_FOUNDERS } from '../data/team';
 import { authService } from './authService';
 
 const API_BASE = '/api';
 
 /**
  * Fetch all published team members from MongoDB Atlas via Express API.
- * Gracefully falls back to bundled CO_FOUNDERS if API is offline or unreachable.
+ * Returns null when offline/error so static preview fallback can remain intact.
  */
 export async function fetchPublicTeam() {
   try {
@@ -17,7 +16,7 @@ export async function fetchPublicTeam() {
 
     if (!res.ok) {
       console.warn(`[Public Team API] HTTP ${res.status}`);
-      return [];
+      return null;
     }
 
     const data = await res.json();
@@ -25,10 +24,10 @@ export async function fetchPublicTeam() {
       return data.data;
     }
 
-    return [];
+    return null;
   } catch (err) {
     console.warn('[Public Team API Network Error]:', err.message);
-    return [];
+    return null;
   }
 }
 
